@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
+import TopNav from "@/components/nav/TopNav";
 import AppSidebar from "@/components/nav/AppSidebar";
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 
@@ -44,9 +44,9 @@ const sections: string[] = [
   "Compare Cards",
   "Graph Service Map",
   // SLO (3)
-  "Gauge.tsx",
-  "ErrorBudgetLine.tsx",
-  "SaturationBand.tsx",
+  "Gauge",
+  "Error Budget Line",
+  "Saturation Band",
   // LIve (2)
   "Live Tail List",
   "Live Traces Feed",
@@ -63,26 +63,16 @@ function AutoCloseOnMobile(): React.JSX.Element | null {
 
 export default function HomePage(): React.JSX.Element {
   return (
-    // Using provider at page-level for your demo.
-    // For persistence via cookies, move this to app/layout.tsx per docs. :contentReference[oaicite:13]{index=13}
-    <SidebarProvider /* defaultOpen can be cookie-driven in layout */>
+    <SidebarProvider>
+      {/* `AppSidebar` and `SidebarInset` must be direct siblings of the provider for inset spacing. */}
       <AppSidebar />
-      <AutoCloseOnMobile />
-
-      {/* Inset variant requires SidebarInset wrapper so spacing is handled by the lib. :contentReference[oaicite:14]{index=14} */}
       <SidebarInset>
-        {/* Top app bar with trigger */}
-        <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
-          <div className="flex h-12 items-center gap-3 px-3">
-            <SidebarTrigger />
-            <div className="text-sm text-muted-foreground">
-              Hello &mdash; Demo of 23 sections
-            </div>
-          </div>
-        </header>
+        {/* Fixed top nav lives above content; offset main with pt-14 below. */}
+        <TopNav />
+        <AutoCloseOnMobile />
 
         {/* Main content */}
-        <main>
+        <main className="w-full pt-14">
           {sections.map((label) => {
             const id = toId(label);
             return (
@@ -109,10 +99,9 @@ export default function HomePage(): React.JSX.Element {
             );
           })}
         </main>
-
         {/* Optional footer spacer */}
         <footer className="h-12" />
       </SidebarInset>
-    </SidebarProvider>
+     </SidebarProvider>
   );
 }

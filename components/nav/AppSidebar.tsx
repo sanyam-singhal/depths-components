@@ -1,3 +1,4 @@
+// components/nav/AppSidebar.tsx
 "use client";
 
 import * as React from "react";
@@ -12,10 +13,51 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
 
-// Convert display label -> lower-case, dash-separated id (strip .tsx)
+import {
+  IconHome2,
+  IconGauge,
+  IconLayoutGrid,
+  IconTable,
+  IconAdjustmentsHorizontal,
+  IconChartAreaLine,
+  IconChartLine,
+  IconWaveSine,
+  IconSparkles,
+  IconColumns,
+  IconChartBar,
+  IconChartDonut,
+  IconChartHistogram,
+  IconGridDots,
+  IconChartFunnel,
+  IconTimeline,
+  IconCards,
+  IconTopologyStar3,
+  IconNumber100Small,
+  IconLivePhoto,
+  IconRipple,
+  IconCircle,
+  IconExclamationCircle
+} from "@tabler/icons-react";
+
+import { type Icon } from "@tabler/icons-react";
+
+type SidebarSection = { label: string; items: string[] };
+
+const STRUCTURE: SidebarSection[] = [
+  { label: "Hello", items: ["Hello"] },
+  { label: "Foundations", items: ["KPI Stat", "Stat Grid", "Data Table", "Control Bar"] },
+  { label: "Trends", items: ["Area Series", "Line Series", "Band Line", "Sparkline Card"] },
+  { label: "Category", items: ["Bar List", "Grouped Bar", "Donut Chart"] },
+  { label: "Distribution", items: ["Histogram", "Heatmap"] },
+  { label: "Specialized", items: ["Funnel", "Timeline", "Compare Cards", "Graph Service Map"] },
+  { label: "SLO", items: ["Gauge", "Error Budget Line", "Saturation Band"] },
+  { label: "LIve", items: ["Live Tail List", "Live Traces Feed"] },
+];
+
 const toId = (label: string): string =>
   label
     .replace(/\.tsx$/i, "")
@@ -25,89 +67,92 @@ const toId = (label: string): string =>
     .replace(/-+/g, "-")
     .toLowerCase();
 
-type SidebarSection = {
-  label: string;
-  items: string[];
+// Standardize icon prop type to the first imported icon's props.
+
+const ICONS: Record<string, Icon> = {
+  // top
+  "hello": IconHome2,
+  // Foundations
+  "kpi-stat": IconGauge,
+  "stat-grid": IconLayoutGrid,
+  "data-table": IconTable,
+  "control-bar": IconAdjustmentsHorizontal,
+  // Trends
+  "area-series": IconChartAreaLine,
+  "line-series": IconChartLine,
+  "band-line": IconWaveSine,
+  "sparkline-card": IconSparkles,
+  // Category
+  "bar-list": IconColumns,
+  "grouped-bar": IconChartBar,
+  "donut-chart": IconChartDonut,
+  // distribution
+  "histogram": IconChartHistogram,
+  "heatmap": IconGridDots,
+  // Specialized
+  "funnel": IconChartFunnel,
+  "timeline": IconTimeline,
+  "compare-cards": IconCards,
+  "graph-service-map": IconTopologyStar3,
+  // SLO
+  "gauge": IconGauge,
+  "error-budget-line": IconExclamationCircle,
+  "saturation-band": IconNumber100Small,
+  // Live
+  "live-tail-list": IconLivePhoto,
+  "live-traces-feed": IconRipple,
 };
 
-const STRUCTURE: SidebarSection[] = [
-  { label: "Hello", items: ["Hello"] },
-  {
-    label: "Foundations",
-    items: ["KPI Stat", "Stat Grid", "Data Table", "Control Bar"],
-  },
-  {
-    label: "Trends",
-    items: ["Area Series", "Line Series", "Band Line", "Sparkline Card"],
-  },
-  {
-    label: "Category",
-    items: ["Bar List", "Grouped Bar", "Donut Chart"],
-  },
-  {
-    label: "distribution",
-    items: ["Histogram", "Heatmap"],
-  },
-  {
-    label: "Specialized",
-    items: ["Funnel", "Timeline", "Compare Cards", "Graph Service Map"],
-  },
-  {
-    label: "SLO",
-    items: ["Gauge.tsx", "ErrorBudgetLine.tsx", "SaturationBand.tsx"],
-  },
-  {
-    label: "LIve",
-    items: ["Live Tail List", "Live Traces Feed"],
-  },
-];
-
 export default function AppSidebar(): React.JSX.Element {
-  const { isMobile, setOpenMobile } = useSidebar(); // official hook for mobile control :contentReference[oaicite:5]{index=5}
+  const { isMobile, setOpenMobile } = useSidebar(); // documented API for mobile control. :contentReference[oaicite:2]{index=2}
 
   const onAnchorClick = React.useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
       e.preventDefault();
       const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-      // Close the offcanvas drawer on mobile after navigation
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
       if (isMobile) setOpenMobile(false);
     },
     [isMobile, setOpenMobile]
   );
 
   return (
-    // variant="inset" requires wrapping main content with <SidebarInset /> in page.tsx. :contentReference[oaicite:6]{index=6}
+    // inset + icon-collapsible; content remains scrollable; shell spans viewport height.
     <Sidebar side="left" variant="inset" collapsible="icon" className="h-svh">
       <SidebarHeader>
-        <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground">
+        <div className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground group-data-[collapsible=icon]:hidden">
           Navigation
         </div>
       </SidebarHeader>
 
-      {/* Scrollable region per docs */}
       <SidebarContent>
         {STRUCTURE.map((group) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupLabel className="font-semibold group-data-[collapsible=icon]:hidden">
+              {group.label}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
                   const id = toId(item);
+                  const iconKey =
+                    id === "gauge-tsx"
+                      ? "gauge"
+                      : id === "errorbudgetline-tsx"
+                      ? "errorbudgetline"
+                      : id === "saturationband-tsx"
+                      ? "saturationband"
+                      : id;
+                  const Icon = ICONS[iconKey] ?? IconCircle;
+
                   return (
                     <SidebarMenuItem key={id}>
-                      <SidebarMenuButton
-                        asChild
-                        // isActive could be set by observing intersection, omitted for brevity. :contentReference[oaicite:7]{index=7}
-                      >
-                        <a
-                          href={`#${id}`}
-                          aria-label={item}
-                          onClick={(e) => onAnchorClick(e, id)}
-                        >
-                          <span>{item.replace(/\.tsx$/i, "")}</span>
+                      <SidebarMenuButton asChild className="font-semibold">
+                        <a href={`#${id}`} aria-label={item} onClick={(e) => onAnchorClick(e, id)}>
+                          <Icon className="size-4 shrink-0" stroke={1.7} />
+                          <span className="truncate group-data-[collapsible=icon]:hidden">
+                            {item.replace(/\.tsx$/i, "")}
+                          </span>
                         </a>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -119,11 +164,12 @@ export default function AppSidebar(): React.JSX.Element {
         ))}
       </SidebarContent>
 
-      <SidebarFooter>
-        <div className="px-2 py-2 text-xs text-muted-foreground">
-          cmd/ctrl + b toggles sidebar
-        </div>
+      <SidebarFooter className="group-data-[collapsible=icon]:hidden">
+        <div className="px-2 py-2 text-xs text-muted-foreground">cmd/ctrl + b toggles</div>
       </SidebarFooter>
+
+      {/* Optional rail for quick hover/toggle affordance */}
+      <SidebarRail />
     </Sidebar>
   );
 }
