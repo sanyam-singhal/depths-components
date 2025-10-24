@@ -45,14 +45,18 @@ const tableRows = [
 ];
 
 // tiny CSV helper just for the demo
-function downloadCSV(filename: string, header: string[], rows: Array<Array<string | number>>) {
-  const csv = [header.join(','), ...rows.map(r => r.join(','))].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-}
+ function downloadCSV(filename: string, header: string[], rows: Array<Array<string | number>>) {
+   const csv = [header.join(','), ...rows.map(r => r.join(','))].join('\n');
+   const BOM = '\uFEFF'; // helps Excel open UTF-8 correctly
+   const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8' });
+   const url = URL.createObjectURL(blob); // create blob URL. :contentReference[oaicite:8]{index=8}
+   const a = document.createElement('a');
+   a.href = url;
+   a.download = filename;
+   a.click();
+   URL.revokeObjectURL(url); // clean up to avoid leaks. :contentReference[oaicite:9]{index=9}
+ }
+
 
 // ---- KPI Stat ----
 export function KPIStatDemo() {
@@ -75,7 +79,7 @@ export function StatGridDemo() {
       <p className="text-sm text-muted-foreground">
         Responsive grid of KPI cards. Uses Tailwind v4 container queries (<code>@md:</code>), so a container ancestor is provided here.
       </p>
-      <StatGrid items={kpis} columns={4} />
+      <StatGrid items={kpis}/>
     </div>
   );
 }
@@ -88,9 +92,11 @@ export function DataTableDemo() {
         Searchable table with optional CSV export.
       </p>
       <DataTable
+        title="Service Metrics"
         columns={tableCols}
         rows={tableRows}
         total={tableRows.length}
+        pageSize={4}
         onExportCSV={() =>
           downloadCSV(
             'services.csv',

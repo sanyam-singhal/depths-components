@@ -1,5 +1,8 @@
 export function formatNumber(value: number): string { return new Intl.NumberFormat(undefined,{maximumFractionDigits:2}).format(value); }
-export function formatPercent(value: number, fractionDigits: number = 1): string { return `${value.toFixed(fractionDigits)}%`; }
+export function formatPercent(value: number, fractionDigits: number = 1): string {
+   const v = value * 100;
+   return `${v.toFixed(fractionDigits)}%`;
+}
 export function formatDurationMs(ms: number): string { if(ms<1000) return `${ms} ms`; const s=ms/1000; if(s<60) return `${s.toFixed(2)} s`; const m=Math.floor(s/60); const rs=(s%60).toFixed(0); return `${m}m ${rs}s`; }
 export function getColorPalette(countOrKeys: string[]|number): string[] { const base=['#4f46e5','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#22c55e','#eab308','#f97316','#a855f7']; const n=Array.isArray(countOrKeys)?countOrKeys.length:countOrKeys; const out: string[]=[]; for(let i=0;i<n;i++) out.push(base[i%base.length]); return out; }
 export function toRechartsTimeSeries(series: Array<{ key: string; points: Array<{ t: number; v: number }> }>): Array<Record<string, number>> { const map=new Map<number,Record<string,number>>(); for(const s of series){ for(const p of s.points){ const row=map.get(p.t)||{t:p.t}; row[s.key]=p.v; map.set(p.t,row); } } return Array.from(map.values()).sort((a,b)=>Number(a.t)-Number(b.t)); }
