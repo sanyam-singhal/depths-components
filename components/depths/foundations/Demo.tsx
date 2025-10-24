@@ -4,8 +4,6 @@
 import * as React from 'react';
 import type {
   TimeSeries,
-  TableColumn,
-  TableRow,
   ControlPanelState,
 } from '@/components/depths/lib/types';
 import { KPIStat } from '@/components/depths/foundations/KPIStat';
