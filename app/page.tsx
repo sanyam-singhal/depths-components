@@ -27,7 +27,7 @@ const sections: string[] = [
   // Foundations
   "KPI Stat", "Stat Grid", "Data Table", "Control Bar",
   // Trends
-  "Area Series", "Line Series", "Band Line", "Sparkline Card",
+  "Area Series", "Line Series", "Band Line",
   // Category
   "Bar List", "Grouped Bar", "Donut Chart",
   // Distribution
@@ -43,7 +43,7 @@ const sections: string[] = [
 // --- hello cards (first section targets per cluster) ---
 const clusterCards = [
   { id: "kpi-stat",       title: "Foundations",  blurb: "KPIs, grids, tables & controls." },
-  { id: "area-series",    title: "Trends",       blurb: "Area, line, bands, sparklines." },
+  { id: "area-series",    title: "Trends",       blurb: "Area, line, bands." },
   { id: "bar-list",       title: "Category",     blurb: "Breakdowns: bars & donut." },
   { id: "histogram",      title: "Distribution", blurb: "Histogram & heatmap." },
   { id: "funnel",         title: "Specialized",  blurb: "Funnels, timelines, graphs, compare." },

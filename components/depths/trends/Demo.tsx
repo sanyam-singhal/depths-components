@@ -2,11 +2,14 @@
 'use client';
 
 import * as React from 'react';
-import type { TimeSeries, BandSeries } from '@/components/depths/lib/types';
 import { AreaSeries } from '@/components/depths/trends/AreaSeries';
 import { LineSeries } from '@/components/depths/trends/LineSeries';
 import { BandLine } from '@/components/depths/trends/BandLine';
-import { SparklineCard } from '@/components/depths/trends/SparklineCard';
+
+export interface TimeSeriesPoint { t: number; v: number; }
+export interface TimeSeries { key: string; points: TimeSeriesPoint[]; }
+export interface BandPoint { t: number; mean?: number; min?: number; max?: number; p50?: number; p95?: number; p99?: number; }
+export interface BandSeries { key: string; points: BandPoint[]; }
 
 // ---------- deterministic dummy data helpers ----------
 const ts = (key: string, n = 48, f: (i: number) => number): TimeSeries => ({
@@ -42,18 +45,28 @@ const latencyBand: BandSeries = {
   }),
 };
 
-// small sparklines for cards
-const spark = (key: string) =>
-  ts(key, 32, i => 50 + 18 * Math.sin(i / 3 + (key.length % 5)) + i * 0.4);
 
 // ---------- Demos ----------
 export function AreaSeriesDemo() {
   return (
     <div className="space-y-4 @container">
       <p className="text-sm text-muted-foreground">
-        Stacked area series with grid, tooltip, legend, and brush for quick zoom.
+        Stacked area series with labeled axes, header legend (click to toggle, hover to focus),
+        a custom tooltip, and a tidy brush for quick zoom.
       </p>
-      <AreaSeries series={areaSeries} showLegend height={320} />
+      <AreaSeries
+        title="Area Series"
+        description="Orders, revenue, and refunds over time."
+        series={areaSeries}
+        stack="stacked"
+        legend="header"
+        brush
+        xLabel="Index"
+        yLabel="Value"
+        xTickFormatter={(t) => String(t)}
+        valueFormatter={(v) => new Intl.NumberFormat().format(v)}
+        height={320}
+      />
     </div>
   );
 }
@@ -62,41 +75,45 @@ export function LineSeriesDemo() {
   return (
     <div className="space-y-4 @container">
       <p className="text-sm text-muted-foreground">
-        Multi-line time series rendered in <code>percent</code> mode for metrics like uptime/error rate.
+        Multi-line time series displayed as percentages (e.g. uptime & error rate) with a header legend
+        (click to toggle, hover to focus), custom tooltip, and brush for quick zoom.
       </p>
-      <LineSeries series={linePctSeries} yAxisMode="percent" showLegend height={320} />
+      <LineSeries
+        title="Line Series"
+        description="Uptime and error rate over time."
+        series={linePctSeries}
+        yAxisMode="percent"
+        legend="header"
+        brush
+        xLabel="Index"
+        yLabel="Rate"
+        xTickFormatter={(t) => String(t)}
+        height={320}
+      />
     </div>
   );
 }
+
 
 export function BandLineDemo() {
   return (
     <div className="space-y-4 @container">
       <p className="text-sm text-muted-foreground">
-        P50–P95 latency band with mean overlay to visualize spread vs. typical.
+        P50–P95 latency band with a mean overlay; hover for the exact range and mean. Toggle series
+        from the header legend when multiple bands are provided.
       </p>
-      <BandLine series={[latencyBand]} mode="p50p95" showMean height={320} />
-    </div>
-  );
-}
-
-export function SparklineCardDemo() {
-  const cards = [
-    { label: 'CPU', value: '68%', series: spark('cpu') },
-    { label: 'Memory', value: '7.2 GB', series: spark('mem') },
-    { label: 'Disk IO', value: '120 MB/s', series: spark('disk') },
-    { label: 'Requests', value: '530 req/s', series: spark('rps') },
-  ];
-  return (
-    <div className="space-y-4 @container">
-      <p className="text-sm text-muted-foreground">
-        Compact KPI tiles with tiny area sparklines—ideal for overviews and grids.
-      </p>
-      <div className="grid grid-cols-1 gap-4 @md:grid-cols-2 @xl:grid-cols-4">
-        {cards.map((c) => (
-          <SparklineCard key={c.label} label={c.label} value={c.value} series={c.series} />
-        ))}
-      </div>
+      <BandLine
+        title="Latency Band"
+        description="Typical (p50) to high tail (p95) latency with mean overlay."
+        series={[latencyBand]}
+        mode="p50p95"
+        showMean
+        brush
+        xLabel="Index"
+        yLabel="Latency (ms)"
+        xTickFormatter={(t) => String(t)}
+        height={320}
+      />
     </div>
   );
 }
@@ -106,7 +123,6 @@ export const TRENDS_DEMOS = {
   'area-series': AreaSeriesDemo,
   'line-series': LineSeriesDemo,
   'band-line': BandLineDemo,
-  'sparkline-card': SparklineCardDemo,
 } as const;
 
 export type TrendsId = keyof typeof TRENDS_DEMOS;

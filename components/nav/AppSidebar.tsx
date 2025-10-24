@@ -50,7 +50,7 @@ type SidebarSection = { label: string; items: string[] };
 const STRUCTURE: SidebarSection[] = [
   { label: "Hello", items: ["Hello"] },
   { label: "Foundations", items: ["KPI Stat", "Stat Grid", "Data Table", "Control Bar"] },
-  { label: "Trends", items: ["Area Series", "Line Series", "Band Line", "Sparkline Card"] },
+  { label: "Trends", items: ["Area Series", "Line Series", "Band Line"] },
   { label: "Category", items: ["Bar List", "Grouped Bar", "Donut Chart"] },
   { label: "Distribution", items: ["Histogram", "Heatmap"] },
   { label: "Specialized", items: ["Funnel", "Timeline", "Compare Cards", "Graph Service Map"] },

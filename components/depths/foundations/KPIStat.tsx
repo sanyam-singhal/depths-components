@@ -2,8 +2,13 @@
 
 import * as React from 'react';
 import { Card } from '@/components/ui/card';
-import { formatNumber, formatPercent } from '@/components/depths/lib/chartUtils';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
+
+export function formatNumber(value: number): string { return new Intl.NumberFormat(undefined,{maximumFractionDigits:2}).format(value); }
+export function formatPercent(value: number, fractionDigits: number = 1): string {
+   const v = value * 100;
+   return `${v.toFixed(fractionDigits)}%`;
+}
 
 export interface BaseChartProps {
   className?: string;
