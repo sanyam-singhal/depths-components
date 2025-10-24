@@ -1,9 +1,19 @@
 'use client';
 
 import * as React from 'react';
-import type { BaseChartProps, TableColumn, TableRow } from '@/components/depths/lib/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+
+export interface BaseChartProps {
+  className?: string;
+  isLoading?: boolean;
+  error?: Error | null;
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+}
+
+export interface TableColumn { key: string; label: string; width?: number; align?: 'left'|'right'|'center'; }
+export type TableRow = Record<string, unknown>;
 
 export interface DataTableProps extends BaseChartProps {
   readonly title?: string;
@@ -71,10 +81,10 @@ export function DataTable(props: DataTableProps): React.JSX.Element {
 
   // ---- UI ----
   return (
-    <div {...a11y} className={['w-full space-y-3', className ?? ''].join(' ')}>
+    <div {...a11y} className={['rounded-lg border border-border bg-card p-3 @md:p-4 shadow-sm w-full space-y-3', className ?? ''].join(' ')}>
       {/* Title + toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        {title && <div className="text-base font-semibold">{title}</div>}
+        {title && <div className="text-lg font-semibold text-foreground">{title}</div>}
         <div className="ms-auto flex w-full items-center gap-2 @md:w-auto">
           {searchable && (
             <Input

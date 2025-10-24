@@ -2,21 +2,25 @@
 'use client';
 
 import * as React from 'react';
-import type { BaseChartProps, KPI } from '@/components/depths/lib/types';
 import { KPIStat } from '@/components/depths/foundations/KPIStat';
 
-/**
- * Responsive grid for KPI cards.
- * - Uses auto-fit with a min card width so it adapts to the container.
- * - No runtime-computed Tailwind classes (purge-safe).
- * - Respect loading/error from BaseChartProps.
- */
+export interface BaseChartProps {
+  className?: string;
+  isLoading?: boolean;
+  error?: Error | null;
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+}
+
+export interface KPI { label: string; value: number; unit?: string; delta?: number; }
+
 export interface StatGridProps extends BaseChartProps {
   readonly items: ReadonlyArray<Readonly<KPI>>;
+  readonly title: string;
 }
 
 export function StatGrid(props: StatGridProps): React.JSX.Element {
-  const { items, className, isLoading, error, ...a11y } = props;
+  const { title,items, className, isLoading, error, ...a11y } = props;
 
   if (error) {
     return (
@@ -37,7 +41,7 @@ export function StatGrid(props: StatGridProps): React.JSX.Element {
   const renderSkeletons = (count: number) => (
     <div
       className={[
-        'grid gap-3 @md:gap-4',
+        'rounded-lg border border-border bg-card p-3 @md:p-4 shadow-sm grid gap-3 @md:gap-4',
         // auto-fit: min 16rem columns, fill the available row width
         'grid-cols-[repeat(auto-fit,minmax(16rem,1fr))]',
         className ?? '',
@@ -65,6 +69,8 @@ export function StatGrid(props: StatGridProps): React.JSX.Element {
   }
 
   return (
+    <div className="rounded-lg border border-border bg-card p-3 @md:p-4 shadow-sm items-center justify-between gap-2">
+        {title && <div className="text-lg font-semibold pb-4 text-foreground">{title}</div>}
     <div
       {...a11y}
       className={[
@@ -78,6 +84,7 @@ export function StatGrid(props: StatGridProps): React.JSX.Element {
       {items.map((kpi, idx) => (
         <KPIStat key={`${kpi.label}-${idx}`} kpi={kpi} />
       ))}
+    </div>
     </div>
   );
 }

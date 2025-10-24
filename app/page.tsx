@@ -23,7 +23,7 @@ const toId = (label: string): string =>
     .toLowerCase();
 
 const sections: string[] = [
-  "Hello",
+  "Building blocks for Analytics Dashboards",
   // Foundations
   "KPI Stat", "Stat Grid", "Data Table", "Control Bar",
   // Trends
@@ -101,7 +101,7 @@ export default function HomePage(): React.JSX.Element {
                   </h1>
 
                   {/* --- Hello section: square card grid --- */}
-                  {id === "hello" ? (
+                  {id === "building-blocks-for-analytics-dashboards" ? (
                     <div className="space-y-6">
                       <p className="text-sm text-muted-foreground max-w-prose">
                         A curated library of React&nbsp;19 + Tailwind&nbsp;v4 analytics components,
@@ -110,7 +110,7 @@ export default function HomePage(): React.JSX.Element {
 
                       <div className="@container">
                         {/* Auto-fit cards; compact on mobile, square from @md: */}
-                        <div className="grid gap-3 @md:gap-4 grid-cols-[repeat(auto-fit,minmax(16rem,1fr))]">
+                        <div className="grid gap-3 @md:gap-4 grid-cols-[repeat(auto-fit,minmax(12rem,1fr))]">
                         {clusterCards.map((c, i) => (
                           <a
                             key={c.id}
@@ -125,8 +125,8 @@ export default function HomePage(): React.JSX.Element {
                               <div className="mb-2 grid h-9 w-9 place-items-center rounded-full bg-accent/10 text-accent text-sm font-semibold">
                                 {i + 1}
                               </div>
-                              <h3 className="text-sm font-semibold leading-6">{c.title}</h3>
-                              <p className="mt-1 text-xs text-muted-foreground">{c.blurb}</p>
+                              <h3 className="text-lg font-semibold leading-6">{c.title}</h3>
+                              <p className="mt-1 text-sm text-muted-foreground">{c.blurb}</p>
                             </div>
                           </a>
                         ))}

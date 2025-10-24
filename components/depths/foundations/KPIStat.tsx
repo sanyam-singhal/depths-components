@@ -2,9 +2,21 @@
 
 import * as React from 'react';
 import { Card } from '@/components/ui/card';
-import type { BaseChartProps, KPI, TimeSeries } from '@/components/depths/lib/types';
 import { formatNumber, formatPercent } from '@/components/depths/lib/chartUtils';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
+
+export interface BaseChartProps {
+  className?: string;
+  isLoading?: boolean;
+  error?: Error | null;
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+}
+
+export interface TimeSeriesPoint { t: number; v: number; }
+export interface TimeSeries { key: string; points: TimeSeriesPoint[]; }
+
+export interface KPI { label: string; value: number; unit?: string; delta?: number; }
 
 export interface KPIStatProps extends BaseChartProps {
   readonly kpi: Readonly<KPI>;

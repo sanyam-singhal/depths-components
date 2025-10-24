@@ -2,11 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import type {
-  TimeSeries,
-  ControlPanelState,
-} from '@/components/depths/lib/types';
-import { KPIStat } from '@/components/depths/foundations/KPIStat';
+import { KPIStat, type TimeSeries } from '@/components/depths/foundations/KPIStat';
 import { StatGrid } from '@/components/depths/foundations/StatGrid';
 import { DataTable } from '@/components/depths/foundations/DataTable';
 import { ControlBar } from '@/components/depths/foundations/ControlBar';
@@ -79,7 +75,7 @@ export function StatGridDemo() {
       <p className="text-sm text-muted-foreground">
         Responsive grid of KPI cards. Uses Tailwind v4 container queries (<code>@md:</code>), so a container ancestor is provided here.
       </p>
-      <StatGrid items={kpis}/>
+      <StatGrid title= "Title for Stat Grid" items={kpis}/>
     </div>
   );
 }
@@ -112,31 +108,60 @@ export function DataTableDemo() {
 // ---- Control Bar ----
 // local demo state; ControlBar triggers onChange when its internal action updates
 export function ControlBarDemo() {
-  const [state, setState] = React.useState<ControlPanelState>({
-    range: '24h',
-    window: '5m',
-    groupBy: 'service',
-    topK: 10,
-    showLegend: true,
-  });
+  const controls = [
+    {
+      type: 'select',
+      key: 'range',
+      label: 'Range',
+      options: [
+        { label: '1h', value: '1h' },
+        { label: '6h', value: '6h' },
+        { label: '24h', value: '24h' },
+        { label: '7d', value: '7d' },
+        { label: '30d', value: '30d' },
+      ],
+      defaultValue: '24h',
+    },
+    {
+      type: 'select',
+      key: 'window',
+      label: 'Window',
+      options: [
+        { label: '1m', value: '1m' },
+        { label: '5m', value: '5m' },
+        { label: '15m', value: '15m' },
+        { label: '1h', value: '1h' },
+      ],
+      defaultValue: '5m',
+    },
+    {
+      type: 'select',
+      key: 'groupBy',
+      label: 'Group by',
+      options: [
+        { label: 'service', value: 'service' },
+        { label: 'region', value: 'region' },
+        { label: 'tier', value: 'tier' },
+      ],
+      defaultValue: 'service',
+    },
+    {
+      type: 'slider',
+      key: 'topK',
+      label: 'Top K',
+      min: 5,
+      max: 50,
+      step: 5,
+      defaultValue: 10,
+    },
+  ] as const;
 
   return (
     <div className="space-y-4 @container">
       <p className="text-sm text-muted-foreground">
-        Interactive controls wired via <code>useActionState</code>; changes are reflected below.
+        Self-contained control bar — only <code>title</code> and <code>controls</code>.
       </p>
-      <ControlBar
-        value={state}
-        // BEFORE: onChange={setState}  // param type wider than expected
-        // AFTER: wrap to match (next: ControlPanelState) => void
-        onChange={(next) => setState(next)}
-        ranges={['1h','6h','24h','7d','30d']}
-        windows={['1m','5m','15m','1h']}
-        groups={['service','region','tier']}
-      />
-      <pre className="rounded-md border bg-muted p-3 text-xs">
-        {JSON.stringify(state, null, 2)}
-      </pre>
+      <ControlBar title="Query Controls" controls={controls} />
     </div>
   );
 }

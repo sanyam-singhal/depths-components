@@ -1,101 +1,208 @@
 // components/depths/foundations/ControlBar.tsx
 'use client';
+
 import * as React from 'react';
-import type { ControlPanelState } from '@/components/depths/lib/types';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { useActionState, startTransition } from 'react';
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 
-export interface ControlBarProps {
-  value: ControlPanelState;
-  onChange: (next: ControlPanelState) => void;
-  ranges?: string[];
-  windows?: string[];
-  groups?: string[];
+/**
+ * Minimal API:
+ *   - title?: string
+ *   - controls: readonly ControlSpec[]
+ *
+ * Self-managed internal state. No external value/onChange required.
+ * No imports from types.ts — all types defined here.
+ */
+
+/** Option shape used by selects. */
+type SelectOption<V extends string | number> = Readonly<{
+  label: string;
+  value: V;
+}>;
+
+/** Union of select option arrays: string or number values. */
+type SelectOptions =
+  | ReadonlyArray<SelectOption<string>>
+  | ReadonlyArray<SelectOption<number>>;
+
+/** Select control dictionary. */
+type SelectSpec = Readonly<{
+  type: 'select';
+  key: string;              // unique key for state
+  label?: string;
+  options: SelectOptions;   // values define if the control is numeric or stringly
+  defaultValue?: string | number;
+}>;
+
+/** Slider control dictionary. */
+type SliderSpec = Readonly<{
+  type: 'slider';
+  key: string;              // unique key for state
+  label?: string;
+  min: number;
+  max: number;
+  step?: number;
+  defaultValue?: number;
+  showValueBadge?: boolean; // default: true
+}>;
+
+export type ControlSpec = SelectSpec | SliderSpec;
+
+export type ControlBarProps = Readonly<{
+  title?: string;
+  controls: ReadonlyArray<ControlSpec>;
+}>;
+
+/** Type guards for runtime narrowing (no `any`). */
+function isSelect(c: ControlSpec): c is SelectSpec {
+  return c.type === 'select';
+}
+function isSlider(c: ControlSpec): c is SliderSpec {
+  return c.type === 'slider';
+}
+function isNumberOptions(
+  options: SelectOptions,
+): options is ReadonlyArray<SelectOption<number>> {
+  return options.length > 0 && typeof options[0].value === 'number';
 }
 
-async function reducer(prev: ControlPanelState, formData: FormData): Promise<ControlPanelState> {
-  const rawGroup = formData.get('groupBy'); // "" when clearing
-  return {
-    range: String(formData.get('range') ?? prev.range),
-    window: String(formData.get('window') ?? prev.window),
-    // coerce "" or null to undefined so state actually clears
-    groupBy: rawGroup === null || rawGroup === '' ? undefined : String(rawGroup),
-    topK: Number(formData.get('topK') ?? prev.topK ?? 10),
-    showLegend: String(formData.get('showLegend') ?? (prev.showLegend ? 'on' : '')) === 'on',
-  };
+/** Build initial internal state from controls. */
+function buildInitialState(controls: ReadonlyArray<ControlSpec>): Record<string, string | number> {
+  const acc: Record<string, string | number> = {};
+  for (const c of controls) {
+    if (isSelect(c)) {
+      if (typeof c.defaultValue !== 'undefined') {
+        acc[c.key] = c.defaultValue;
+      } else if (c.options.length > 0) {
+        acc[c.key] = c.options[0].value as string | number;
+      }
+    } else {
+      // slider
+      acc[c.key] = typeof c.defaultValue === 'number' ? c.defaultValue : c.min;
+    }
+  }
+  return acc;
 }
 
-export function ControlBar({
-  value,
-  onChange,
-  ranges = ['1h','6h','24h','7d','30d'],
-  windows = ['1m','5m','15m','1h'],
-  groups = [],
-}: ControlBarProps) {
-  const [state, dispatch] = useActionState(reducer, value);
-  React.useEffect(() => { onChange(state); }, [state, onChange]);
+export function ControlBar(props: ControlBarProps): React.JSX.Element {
+  const { title, controls } = props;
 
-  // IMPORTANT: detect provided keys so undefined can clear the field
-  const commit = React.useCallback((partial: Partial<ControlPanelState>) => {
-    const fd = new FormData();
+  // Self-managed state: key -> string|number
+  const [state, setState] = React.useState<Record<string, string | number>>(
+    () => buildInitialState(controls),
+  );
 
-    const hasGroupBy = Object.prototype.hasOwnProperty.call(partial, 'groupBy');
-    const nextGroup   = hasGroupBy ? partial.groupBy : state.groupBy;
-
-    fd.set('range',  partial.range  ?? state.range);
-    fd.set('window', partial.window ?? state.window);
-    fd.set('groupBy', nextGroup ?? ''); // when clearing, write "" into FormData
-    fd.set('topK', String(partial.topK ?? state.topK ?? 10));
-    fd.set('showLegend', (partial.showLegend ?? state.showLegend) ? 'on' : '');
-
-    startTransition(() => dispatch(fd)); // keep the action inside a transition
-  }, [dispatch, state]);
+  // If the control definitions change (labels/options/min/max), refresh defaults.
+  React.useEffect(() => {
+    setState(buildInitialState(controls));
+  }, [controls]);
 
   return (
-    <form className="flex flex-wrap items-center gap-3 p-3 rounded-md border bg-white dark:bg-neutral-900">
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-neutral-600">Range</span>
-        <Select defaultValue={value.range} onValueChange={(v)=>commit({ range: v })}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="Range" /></SelectTrigger>
-          <SelectContent>{ranges.map(r=> (<SelectItem key={r} value={r}>{r}</SelectItem>))}</SelectContent>
-        </Select>
-      </div>
+    <section
+      className={[
+        '@container',
+        'rounded-lg border border-border bg-card p-3 @md:p-4 shadow-sm',
+      ].join(' ')}
+    >
+      {title ? (
+        <header className="mb-2 text-lg font-semibold text-foreground">
+          {title}
+        </header>
+      ) : null}
 
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-neutral-600">Window</span>
-        <Select defaultValue={value.window} onValueChange={(v)=>commit({ window: v })}>
-          <SelectTrigger className="w-28"><SelectValue placeholder="Window" /></SelectTrigger>
-          <SelectContent>{windows.map(w=> (<SelectItem key={w} value={w}>{w}</SelectItem>))}</SelectContent>
-        </Select>
-      </div>
+      <div
+        className={[
+          'grid gap-3 @md:gap-4',
+          // Tailwind v4 arbitrary grid template; container-friendly responsive packing.
+          // https://tailwindcss.com/docs/grid-template-columns
+          'grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]',
+        ].join(' ')}
+      >
+        {controls.map((c) => {
+          if (isSelect(c)) {
+            const isNumeric = isNumberOptions(c.options);
+            const current = state[c.key];
+            const display = String(current ?? '');
 
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-neutral-600">Group</span>
-        <Select
-          defaultValue={value.groupBy ?? 'none'}
-          onValueChange={(v) => commit({ groupBy: v === 'none' ? undefined : v })}
-        >
-          <SelectTrigger className="w-40"><SelectValue placeholder="Dimension" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            {groups.map(g => (<SelectItem key={g} value={g}>{g}</SelectItem>))}
-          </SelectContent>
-        </Select>
-      </div>
+            return (
+              <div key={c.key} className="flex min-w-0 flex-col gap-1">
+                {c.label ? (
+                  <label className="text-sm font-medium text-muted-foreground">
+                    {c.label}
+                  </label>
+                ) : null}
+                <Select
+                  value={display}
+                  // shadcn/Radix Select emits strings; parse to number iff options are numeric.
+                  // https://ui.shadcn.com/docs/components/slider (Radix usage) / Select emits strings
+                  onValueChange={(v) =>
+                    setState((prev) => ({
+                      ...prev,
+                      [c.key]: isNumeric ? Number(v) : v,
+                    }))
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={c.label ?? c.key} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {c.options.map((opt) => (
+                      <SelectItem key={String(opt.value)} value={String(opt.value)}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            );
+          }
 
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-neutral-600">Top K</span>
-        <input
-          type="range" min={1} max={50} defaultValue={value.topK ?? 10} className="w-40"
-          onChange={(e)=>commit({ topK: Number(e.currentTarget.value) })}
-        />
-      </div>
+          if (isSlider(c)) {
+            const showBadge = c.showValueBadge ?? true;
+            const raw = state[c.key];
+            const sval = typeof raw === 'number' ? raw : Number(raw);
 
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-neutral-600">Legend</span>
-        <Switch defaultChecked={value.showLegend} onCheckedChange={(checked)=>commit({ showLegend: checked })} />
+            return (
+              <div key={c.key} className="flex min-w-0 flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    {c.label ?? c.key}
+                  </label>
+                  {showBadge && (
+                    <span className="rounded bg-muted px-2 py-0.5 text-xs tabular-nums text-foreground/80">
+                      {sval}
+                    </span>
+                  )}
+                </div>
+                <Slider
+                  min={c.min}
+                  max={c.max}
+                  step={c.step ?? 1}
+                  value={[sval]}
+                  // Radix/Slider uses number[] for controlled values:
+                  // https://www.radix-ui.com/primitives/docs/components/slider
+                  onValueChange={(arr) =>
+                    setState((prev) => ({
+                      ...prev,
+                      [c.key]: typeof arr[0] === 'number' ? arr[0] : sval,
+                    }))
+                  }
+                  className="w-full"
+                />
+              </div>
+            );
+          }
+
+          // Exhaustiveness — ensures future control kinds must render here
+          return null as never;
+        })}
       </div>
-    </form>
+    </section>
   );
 }
