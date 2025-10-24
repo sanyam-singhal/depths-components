@@ -8,6 +8,7 @@ import {
   SidebarProvider,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { renderFoundationsDemo } from "@/components/depths/foundations/Demo";
 
 // Keep IDs exactly in sync with the sidebar.
 const toId = (label: string): string =>
@@ -64,44 +65,37 @@ function AutoCloseOnMobile(): React.JSX.Element | null {
 export default function HomePage(): React.JSX.Element {
   return (
     <SidebarProvider>
-      {/* `AppSidebar` and `SidebarInset` must be direct siblings of the provider for inset spacing. */}
       <AppSidebar />
       <SidebarInset>
-        {/* Fixed top nav lives above content; offset main with pt-14 below. */}
         <TopNav />
         <AutoCloseOnMobile />
-
-        {/* Main content */}
         <main className="w-full pt-14">
           {sections.map((label) => {
             const id = toId(label);
             return (
-              <section
-                key={id}
-                id={id}
-                className="min-h-svh w-full scroll-mt-16 px-6 py-12"
-              >
+              <section key={id} id={id} className="w-full scroll-mt-16 px-6 py-12">
                 <div className="mx-auto max-w-4xl">
                   <h1 className="mb-4 text-2xl font-semibold tracking-tight">
                     {label.replace(/\.tsx$/i, "")}
                   </h1>
 
-                  {/* Skeleton content to force scroll and show layout */}
-                  <div className="space-y-4">
-                    <div className="h-5 w-1/3 rounded bg-muted" />
-                    <div className="h-4 w-full rounded bg-muted" />
-                    <div className="h-4 w-11/12 rounded bg-muted" />
-                    <div className="h-4 w-4/5 rounded bg-muted" />
-                    <div className="h-80 rounded border border-dashed" />
-                  </div>
+                  {/* Ask the demo registry for this section; fallback to skeleton */}
+                  {renderFoundationsDemo(id) ?? (
+                    <div className="space-y-4">
+                      <div className="h-5 w-1/3 rounded bg-muted" />
+                      <div className="h-4 w-full rounded bg-muted" />
+                      <div className="h-4 w-11/12 rounded bg-muted" />
+                      <div className="h-4 w-4/5 rounded bg-muted" />
+                      <div className="h-80 rounded border border-dashed" />
+                    </div>
+                  )}
                 </div>
               </section>
             );
           })}
         </main>
-        {/* Optional footer spacer */}
         <footer className="h-12" />
       </SidebarInset>
-     </SidebarProvider>
+    </SidebarProvider>
   );
 }

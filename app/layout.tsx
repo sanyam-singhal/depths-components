@@ -79,10 +79,6 @@ export const metadata: Metadata = {
     // shortcut: "/favicon-16x16.png",
     // apple: "/apple-touch-icon.png",
   },
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000957" }, // your brand navy
-  ],
   // If you add a web app manifest later:
   // manifest: "/site.webmanifest",
 };
