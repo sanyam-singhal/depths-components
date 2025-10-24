@@ -11,6 +11,7 @@ import {
 import { renderFoundationsDemo } from "@/components/depths/foundations/Demo";
 import { renderTrendsDemo } from "@/components/depths/trends/Demo";
 import { renderCategoryDemo } from "@/components/depths/category/Demo"; 
+import { renderDistributionDemo } from "@/components/depths/distribution/Demo";
 
 // Keep IDs exactly in sync with the sidebar.
 const toId = (label: string): string =>
@@ -82,7 +83,11 @@ export default function HomePage(): React.JSX.Element {
                   </h1>
 
                   {/* Ask the demo registry for this section; fallback to skeleton */}
-                  {renderFoundationsDemo(id) ?? renderTrendsDemo(id) ?? renderCategoryDemo(id) ?? (
+                  {renderFoundationsDemo(id) 
+                  ?? renderTrendsDemo(id) 
+                  ?? renderCategoryDemo(id) 
+                  ?? renderDistributionDemo(id)
+                  ?? (
                     <div className="space-y-4">
                       <div className="h-5 w-1/3 rounded bg-muted" />
                       <div className="h-4 w-full rounded bg-muted" />
