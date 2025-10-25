@@ -25,7 +25,7 @@ const sections: string[] = [
   // Foundations
   "KPI Stat", "Stat Grid", "Data Table", "Control Bar",
   // Trends
-  "Area Series", "Line Series", "Band Line", "Scatter Plot",
+  "Area Series", "Line Series", "Band Line", "Scatter Plot","Sankey Diagram",
   // Category
   "Bar List", "Grouped Bar", "Donut Chart",
   // Distribution

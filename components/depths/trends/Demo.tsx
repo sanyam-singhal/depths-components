@@ -3,16 +3,10 @@
 
 import * as React from 'react';
 import { AreaSeries } from '@/components/depths/trends/AreaSeries';
-import { LineSeries } from '@/components/depths/trends/LineSeries';
-import { BandLine } from '@/components/depths/trends/BandLine';
-import { ScatterPlot } from '@/components/depths/trends/ScatterPlot';
-
-export interface TimeSeriesPoint { t: number; v: number; }
-export interface TimeSeries { key: string; points: TimeSeriesPoint[]; }
-export interface BandPoint { t: number; mean?: number; min?: number; max?: number; p50?: number; p95?: number; p99?: number; }
-export interface BandSeries { key: string; points: BandPoint[]; }
-export type ScatterPoint = Readonly<{ x: number; y: number }>;
-export type ScatterSeries = Readonly<{ key: string; points: ReadonlyArray<ScatterPoint> }>;
+import { LineSeries, type TimeSeries } from '@/components/depths/trends/LineSeries';
+import { BandLine, type BandSeries } from '@/components/depths/trends/BandLine';
+import { ScatterPlot, type ScatterSeries } from '@/components/depths/trends/ScatterPlot';
+import { SankeyDiagram, type SankeyData } from '@/components/depths/trends/SankeyDiagram';
 
 // ---------- deterministic dummy data helpers ----------
 const ts = (key: string, n = 48, f: (i: number) => number): TimeSeries => ({
@@ -152,12 +146,57 @@ export function ScatterPlotDemo() {
   );
 }
 
+// Add this to Demo.tsx after ScatterPlotDemo
+
+const sankeyData: SankeyData = {
+  nodes: [
+    { name: 'Source A' },
+    { name: 'Source B' },
+    { name: 'Intermediate X' },
+    { name: 'Intermediate Y' },
+    { name: 'Sink P' },
+    { name: 'Sink Q' },
+    { name: 'Sink R' },
+  ],
+  links: [
+    { source: 0, target: 2, value: 30 },
+    { source: 0, target: 3, value: 20 },
+    { source: 1, target: 2, value: 25 },
+    { source: 1, target: 3, value: 15 },
+    { source: 2, target: 4, value: 40 },
+    { source: 2, target: 5, value: 10 },
+    { source: 3, target: 5, value: 20 },
+    { source: 3, target: 6, value: 15 },
+  ],
+};
+
+export function SankeyDiagramDemo() {
+  return (
+    <div className="space-y-4 @container">
+      <p className="text-sm text-muted-foreground">
+        Sankey diagram showing flows between nodes, with custom node rendering, tooltips on links,
+        and proportional link widths.
+      </p>
+      <SankeyDiagram
+        title="Sankey Diagram"
+        description="Multi-stage flow from sources to sinks."
+        data={sankeyData}
+        valueFormatter={(v) => `${v} units`}
+        height={320}
+        nodeWidth={20}
+        nodePadding={50}
+      />
+    </div>
+  );
+}
+
 // Update TRENDS_DEMOS
 export const TRENDS_DEMOS = {
   'area-series': AreaSeriesDemo,
   'line-series': LineSeriesDemo,
   'band-line': BandLineDemo,
   'scatter-plot': ScatterPlotDemo,
+  'sankey-diagram': SankeyDiagramDemo,
 } as const;
 
 export type TrendsId = keyof typeof TRENDS_DEMOS;
