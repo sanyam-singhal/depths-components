@@ -48,13 +48,11 @@ import { type Icon } from "@tabler/icons-react";
 type SidebarSection = { label: string; items: string[] };
 
 const STRUCTURE: SidebarSection[] = [
-  { label: "Hello", items: ["Hello"] },
+  { label: "Building Blocks", items: ["Building blocks"] },
   { label: "Foundations", items: ["KPI Stat", "Stat Grid", "Data Table", "Control Bar"] },
   { label: "Trends", items: ["Area Series", "Line Series", "Band Line"] },
   { label: "Category", items: ["Bar List", "Grouped Bar", "Donut Chart"] },
   { label: "Distribution", items: ["Histogram", "Heatmap"] },
-  { label: "Specialized", items: ["Funnel", "Timeline", "Compare Cards", "Graph Service Map"] },
-  { label: "SLO", items: ["Gauge", "Error Budget Line", "Saturation Band"] },
   { label: "LIve", items: ["Live Tail List", "Live Traces Feed"] },
 ];
 
@@ -71,7 +69,7 @@ const toId = (label: string): string =>
 
 const ICONS: Record<string, Icon> = {
   // top
-  "hello": IconHome2,
+  "building-blocks": IconHome2,
   // Foundations
   "kpi-stat": IconGauge,
   "stat-grid": IconLayoutGrid,

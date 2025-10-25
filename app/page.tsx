@@ -9,8 +9,6 @@ import { renderFoundationsDemo } from "@/components/depths/foundations/Demo";
 import { renderTrendsDemo } from "@/components/depths/trends/Demo";
 import { renderCategoryDemo } from "@/components/depths/category/Demo";
 import { renderDistributionDemo } from "@/components/depths/distribution/Demo";
-import { renderSpecializedDemo } from "@/components/depths/specialized/Demo";
-import { renderSloDemo } from "@/components/depths/slo/Demo";
 import { renderLiveDemo } from "@/components/depths/live/Demo";
 
 // --- keep your existing toId + sections ---
@@ -23,7 +21,7 @@ const toId = (label: string): string =>
     .toLowerCase();
 
 const sections: string[] = [
-  "Building blocks for Analytics Dashboards",
+  "Building Blocks",
   // Foundations
   "KPI Stat", "Stat Grid", "Data Table", "Control Bar",
   // Trends
@@ -32,10 +30,6 @@ const sections: string[] = [
   "Bar List", "Grouped Bar", "Donut Chart",
   // Distribution
   "Histogram", "Heatmap",
-  // Specialized
-  "Funnel", "Timeline", "Compare Cards", "Graph Service Map",
-  // SLO
-  "Gauge", "Error Budget Line", "Saturation Band",
   // Live
   "Live Tail List", "Live Traces Feed",
 ];
@@ -46,8 +40,6 @@ const clusterCards = [
   { id: "area-series",    title: "Trends",       blurb: "Area, line, bands." },
   { id: "bar-list",       title: "Category",     blurb: "Breakdowns: bars & donut." },
   { id: "histogram",      title: "Distribution", blurb: "Histogram & heatmap." },
-  { id: "funnel",         title: "Specialized",  blurb: "Funnels, timelines, graphs, compare." },
-  { id: "gauge",          title: "SLO",          blurb: "Gauges, budgets, saturation." },
   { id: "live-tail-list", title: "Live",         blurb: "Real-time logs & traces." },
 ] as const;
 
@@ -101,7 +93,7 @@ export default function HomePage(): React.JSX.Element {
                   </h1>
 
                   {/* --- Hello section: square card grid --- */}
-                  {id === "building-blocks-for-analytics-dashboards" ? (
+                  {id === "building-blocks" ? (
                     <div className="space-y-6">
                       <p className="text-sm text-muted-foreground max-w-prose">
                         A curated library of React&nbsp;19 + Tailwind&nbsp;v4 analytics components,
@@ -139,8 +131,6 @@ export default function HomePage(): React.JSX.Element {
                     renderTrendsDemo(id) ??
                     renderCategoryDemo(id) ??
                     renderDistributionDemo(id) ??
-                    renderSpecializedDemo(id) ??
-                    renderSloDemo(id) ??
                     renderLiveDemo(id) ?? (
                       <div className="space-y-4">
                         <div className="h-5 w-1/3 rounded bg-muted" />
