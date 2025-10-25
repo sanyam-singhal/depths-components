@@ -32,14 +32,22 @@ export default function TopNav(): React.JSX.Element {
             className="col-start-2 col-end-3 flex items-center justify-center gap-2 md:col-auto md:justify-start"
             aria-label="Depths Components Home"
           >
-            <Image
-              src="/logo.png"
-              alt="Depths logo"
-              width={24}
-              height={24}
-              className="rounded-sm"
-              priority
-            />
+            <span className="relative inline-block h-[22px] w-[22px]">
+                <Image
+                  src="/logo_light_mode.svg"
+                  alt="Depths logo (light)"
+                  fill
+                  priority
+                  className="block dark:hidden object-contain"
+                />
+                <Image
+                  src="/logo.svg"
+                  alt="Depths logo (dark)"
+                  fill
+                  priority
+                  className="hidden dark:block object-contain"
+                />
+              </span>
             <span className="text-sm md:text-base font-bold">
               Depths <em className="not-italic italic font-bold">Components</em>
             </span>
