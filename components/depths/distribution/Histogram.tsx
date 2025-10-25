@@ -40,14 +40,9 @@ export type HistogramProps = Readonly<
 
     data: HistogramData;
 
-    /** Render Y axis in log space. */
-    logScale?: boolean;
-    /** Use cumulative counts instead of per-bin counts. */
-    cumulative?: boolean;
-
     /** Axis labels & formatters. */
     xLabel?: string;
-    yLabel?: string;
+    yLabel?: string; // Kept for flexibility, but managed internally
     xTickFormatter?: (v: number | string) => string;
     yTickFormatter?: (v: number) => string;
 
@@ -148,10 +143,8 @@ export function Histogram(props: HistogramProps): React.JSX.Element {
     title,
     description,
     data,
-    logScale = false,
-    cumulative = false,
     xLabel,
-    yLabel,
+    yLabel: propYLabel, // Capture prop for potential override
     xTickFormatter,
     yTickFormatter,
     barRadius = [3, 3, 0, 0],
@@ -162,6 +155,14 @@ export function Histogram(props: HistogramProps): React.JSX.Element {
     valueFormatter = formatNumber,
     ...a11y
   } = props;
+
+  // Internal state for controls (previously passed as props)
+  const [logScale, setLogScale] = React.useState(false);
+  const [cumulative, setCumulative] = React.useState(false);
+
+  // Internal yLabel management based on cumulative state
+  const internalYLabel = cumulative ? 'Cumulative count' : 'Count';
+  const effectiveYLabel = propYLabel !== undefined ? propYLabel : internalYLabel;
 
   // rows for Recharts
   const rows = React.useMemo(() => toRows(data), [data]);
@@ -184,10 +185,7 @@ export function Histogram(props: HistogramProps): React.JSX.Element {
     return (
       <div
         {...a11y}
-        className={[
-          'rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive',
-          className ?? '',
-        ].join(' ')}
+        className={['rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive', className ?? ''].join(' ')}
       >
         {error.message ?? 'Something went wrong.'}
       </div>
@@ -222,6 +220,49 @@ export function Histogram(props: HistogramProps): React.JSX.Element {
           {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </header>
       )}
+
+      {/* Integrated controls (ShadCN-styled buttons) */}
+      <div role="toolbar" aria-label="Histogram controls" className="flex flex-wrap items-center gap-2 mb-4">
+        <button
+          type="button"
+          onClick={() => setLogScale(false)}
+          aria-pressed={!logScale}
+          className={[
+            'inline-flex items-center rounded-md border px-2.5 py-1.5 text-xs font-medium',
+            !logScale ? 'bg-secondary text-secondary-foreground' : 'bg-card',
+            'border-border hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          ].join(' ')}
+        >
+          Linear
+        </button>
+        <button
+          type="button"
+          onClick={() => setLogScale(true)}
+          aria-pressed={logScale}
+          className={[
+            'inline-flex items-center rounded-md border px-2.5 py-1.5 text-xs font-medium',
+            logScale ? 'bg-secondary text-secondary-foreground' : 'bg-card',
+            'border-border hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          ].join(' ')}
+        >
+          Log
+        </button>
+
+        <div className="mx-3 h-4 w-px bg-border" aria-hidden />
+
+        <button
+          type="button"
+          onClick={() => setCumulative((v) => !v)}
+          aria-pressed={cumulative}
+          className={[
+            'inline-flex items-center rounded-md border px-2.5 py-1.5 text-xs font-medium',
+            cumulative ? 'bg-secondary text-secondary-foreground' : 'bg-card',
+            'border-border hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          ].join(' ')}
+        >
+          {cumulative ? 'Cumulative' : 'Per-bin'}
+        </button>
+      </div>
 
       <figure className="w-full">
         <div className="w-full" style={{ height: chartHeight }}>
@@ -259,15 +300,13 @@ export function Histogram(props: HistogramProps): React.JSX.Element {
                 axisLine={{ stroke: 'color-mix(in oklch, var(--color-foreground) 24%, transparent)' }}
                 tickFormatter={(v: number) => (yTickFormatter ? yTickFormatter(v) : formatNumber(v))}
               >
-                {yLabel ? (
-                  <Label
-                    value={yLabel}
-                    angle={-90}
-                    position="insideLeft"
-                    offset={10}
-                    className="fill-[var(--color-muted-foreground)] text-base font-semibold"
-                  />
-                ) : null}
+                <Label
+                  value={effectiveYLabel}
+                  angle={-90}
+                  position="insideLeft"
+                  offset={10}
+                  className="fill-[var(--color-muted-foreground)] text-base font-semibold"
+                />
               </YAxis>
 
               <Tooltip

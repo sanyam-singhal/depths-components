@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import type { CategoryItem, DonutSlice } from '@/components/depths/lib/types';
+import type { CategoryItem, DonutSlice } from '@/components/depths/lib/types'; // Assuming types are in a shared lib, but denormalized per file in practice
 import { BarList } from '@/components/depths/category/BarList';
 import { GroupedBar } from '@/components/depths/category/GroupedBar';
 import { DonutChart } from '@/components/depths/category/DonutChart';
@@ -39,9 +39,16 @@ export function BarListDemo() {
   return (
     <div className="space-y-4 @container">
       <p className="text-sm text-muted-foreground">
-        Sorted category list with value bars and optional ±% delta.
+        Interactive sorted category list with proportional bars, deltas, and click handlers.
       </p>
-      <BarList items={topCategories} sort="value" topK={8} />
+      <BarList
+        title="Top Categories"
+        description="By traffic volume"
+        items={topCategories}
+        sort="value"
+        topK={8}
+        onItemClick={(item) => console.log('Clicked:', item.label)}
+      />
     </div>
   );
 }
@@ -50,9 +57,17 @@ export function GroupedBarDemo() {
   return (
     <div className="space-y-4 @container">
       <p className="text-sm text-muted-foreground">
-        Grouped bars across categories for three channels; grid, legend, and tooltip enabled.
+        Grouped/stacked bars with custom tooltip, interactive legend, grid, and brush selector.
       </p>
-      <GroupedBar categories={groupedCategories} series={groupedSeries} height={360} />
+      <GroupedBar
+        title="Channel Performance"
+        description="Across key categories"
+        categories={groupedCategories}
+        series={groupedSeries}
+        height={360}
+        brush
+        legend
+      />
     </div>
   );
 }
@@ -61,14 +76,18 @@ export function DonutChartDemo() {
   return (
     <div className="space-y-4 @container">
       <p className="text-sm text-muted-foreground">
-        Donut with small segments folded into “Other”, center label shows total/100%.
+        Donut with combined small slices, custom tooltip, center total, and slice clicks.
       </p>
       <DonutChart
+        title="Regional Share"
+        description="Traffic distribution"
         slices={donutSlices}
         asPercent
         combineUnderPct={5}
-        centerLabel="Traffic Share"
+        legend="bottom"
+        centerLabel="Total Share"
         height={320}
+        onSliceClick={(slice) => console.log('Clicked:', slice.label)}
       />
     </div>
   );

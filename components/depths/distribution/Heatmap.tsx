@@ -21,7 +21,6 @@ export type HeatmapProps = Readonly<
     title?: string;
     description?: string;
     data: HeatmapData;
-    colorScale?: 'linear' | 'log';
     domain?: Readonly<{ min?: number; max?: number }>;
     xLabel?: string;
     yLabel?: string;
@@ -138,7 +137,6 @@ export function Heatmap({
   title,
   description,
   data,
-  colorScale = 'linear',
   domain,
   xLabel,
   yLabel,
@@ -158,6 +156,9 @@ export function Heatmap({
 }: HeatmapProps): React.JSX.Element {
   const rows = data.yLabels.length;
   const cols = data.xLabels.length;
+
+  // Internal state for controls (previously passed as prop)
+  const [colorScale, setColorScale] = React.useState<'linear' | 'log'>('linear');
 
   // flatten values for domain/legend
   const values = React.useMemo<number[]>(() => {
@@ -317,6 +318,37 @@ export function Heatmap({
           {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </header>
       )}
+
+      {/* Integrated controls (ShadCN-styled buttons) */}
+      <div role="toolbar" aria-label="Heatmap controls" className="flex flex-wrap items-center gap-2 mb-4">
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-muted-foreground">Scale</span>
+          <button
+            type="button"
+            onClick={() => setColorScale('linear')}
+            aria-pressed={colorScale === 'linear'}
+            className={[
+              'inline-flex items-center rounded-md border px-2.5 py-1.5 text-xs font-medium',
+              colorScale === 'linear' ? 'bg-secondary text-secondary-foreground' : 'bg-card',
+              'border-border hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            ].join(' ')}
+          >
+            Linear
+          </button>
+          <button
+            type="button"
+            onClick={() => setColorScale('log')}
+            aria-pressed={colorScale === 'log'}
+            className={[
+              'inline-flex items-center rounded-md border px-2.5 py-1.5 text-xs font-medium',
+              colorScale === 'log' ? 'bg-secondary text-secondary-foreground' : 'bg-card',
+              'border-border hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            ].join(' ')}
+          >
+            Log
+          </button>
+        </div>
+      </div>
 
       <div className="flex items-stretch">
         {/* Y-axis gutter */}
