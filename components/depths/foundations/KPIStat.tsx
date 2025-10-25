@@ -151,9 +151,9 @@ export function KPIStat(props: KPIStatProps): React.JSX.Element {
                   <Line
                     type="monotone"
                     dataKey="v"
-                    stroke="var(--color-chart-1, #10b981)"
+                    stroke="var(--color-chart-1)"
                     dot={false}
-                    strokeWidth={2}
+                    strokeWidth={3}
                   />
                 </LineChart>
               </ResponsiveContainer>
