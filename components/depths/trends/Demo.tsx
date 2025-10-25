@@ -5,11 +5,14 @@ import * as React from 'react';
 import { AreaSeries } from '@/components/depths/trends/AreaSeries';
 import { LineSeries } from '@/components/depths/trends/LineSeries';
 import { BandLine } from '@/components/depths/trends/BandLine';
+import { ScatterPlot } from '@/components/depths/trends/ScatterPlot';
 
 export interface TimeSeriesPoint { t: number; v: number; }
 export interface TimeSeries { key: string; points: TimeSeriesPoint[]; }
 export interface BandPoint { t: number; mean?: number; min?: number; max?: number; p50?: number; p95?: number; p99?: number; }
 export interface BandSeries { key: string; points: BandPoint[]; }
+export type ScatterPoint = Readonly<{ x: number; y: number }>;
+export type ScatterSeries = Readonly<{ key: string; points: ReadonlyArray<ScatterPoint> }>;
 
 // ---------- deterministic dummy data helpers ----------
 const ts = (key: string, n = 48, f: (i: number) => number): TimeSeries => ({
@@ -118,11 +121,43 @@ export function BandLineDemo() {
   );
 }
 
-// ---------- Public registry + resolver (mirrors foundations) ----------
+// Add this to Demo.tsx after BandLineDemo
+
+const scatterSeries: ScatterSeries[] = [
+  { key: 'groupA', points: Array.from({ length: 32 }, (_, i) => ({ x: i, y: 20 + 15 * Math.sin(i / 3) + Math.random() * 10 })) },
+  { key: 'groupB', points: Array.from({ length: 32 }, (_, i) => ({ x: i, y: 40 + 20 * Math.cos(i / 4) + Math.random() * 8 })) },
+];
+
+export function ScatterPlotDemo() {
+  return (
+    <div className="space-y-4 @container">
+      <p className="text-sm text-muted-foreground">
+        Multi-group scatter plot with colored dots, header legend (click to toggle, hover to focus),
+        and custom tooltip showing x,y coordinates.
+      </p>
+      <ScatterPlot
+        title="Scatter Plot"
+        description="Two groups of correlated points over index."
+        series={scatterSeries}
+        legend="header"
+        xLabel="Index"
+        yLabel="Value"
+        xTickFormatter={(x) => String(x)}
+        yTickFormatter={(y) => String(y)}
+        valueFormatter={(v) => v.toFixed(1)}
+        height={320}
+        dotSize={5}
+      />
+    </div>
+  );
+}
+
+// Update TRENDS_DEMOS
 export const TRENDS_DEMOS = {
   'area-series': AreaSeriesDemo,
   'line-series': LineSeriesDemo,
   'band-line': BandLineDemo,
+  'scatter-plot': ScatterPlotDemo,
 } as const;
 
 export type TrendsId = keyof typeof TRENDS_DEMOS;
