@@ -34,25 +34,126 @@ const heatmapData: HeatmapData = { xLabels, yLabels, z };
 
 // ---------------- Demos ----------------
 
-export function HistogramDemo() {
+export function HistogramDemo(): React.JSX.Element {
+  const [logScale, setLogScale] = React.useState(false);
+  const [cumulative, setCumulative] = React.useState(false);
+
   return (
     <div className="space-y-4 @container">
       <p className="text-sm text-muted-foreground">
-        Frequency histogram (0–100) with cumulative toggle optional in the API; demo shows standard counts.
+        Frequency histogram (0–100). Toggle log scale (safe domain) or cumulative counts.
       </p>
-      {/* Recharts' <ResponsiveContainer> inside Histogram needs a concrete parent height */}
-      <Histogram data={histData} height={320} />
+
+      <div role="toolbar" aria-label="Histogram controls" className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setLogScale(false)}
+          aria-pressed={!logScale}
+          className={[
+            'inline-flex items-center rounded-md border px-2.5 py-1.5 text-xs font-medium',
+            !logScale ? 'bg-secondary text-secondary-foreground' : 'bg-card',
+            'border-border hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          ].join(' ')}
+        >
+          Linear
+        </button>
+        <button
+          type="button"
+          onClick={() => setLogScale(true)}
+          aria-pressed={logScale}
+          className={[
+            'inline-flex items-center rounded-md border px-2.5 py-1.5 text-xs font-medium',
+            logScale ? 'bg-secondary text-secondary-foreground' : 'bg-card',
+            'border-border hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          ].join(' ')}
+        >
+          Log
+        </button>
+
+        <div className="mx-3 h-4 w-px bg-border" aria-hidden />
+
+        <button
+          type="button"
+          onClick={() => setCumulative((v) => !v)}
+          aria-pressed={cumulative}
+          className={[
+            'inline-flex items-center rounded-md border px-2.5 py-1.5 text-xs font-medium',
+            cumulative ? 'bg-secondary text-secondary-foreground' : 'bg-card',
+            'border-border hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          ].join(' ')}
+        >
+          {cumulative ? 'Cumulative' : 'Per-bin'}
+        </button>
+      </div>
+
+      {/* Recharts needs a concrete parent height */}
+      <Histogram
+        title="Histogram"
+        description="Count of values by 10-point bins."
+        data={histData}
+        height={320}
+        logScale={logScale}
+        cumulative={cumulative}
+        xLabel="Value"
+        yLabel={cumulative ? 'Cumulative count' : 'Count'}
+      />
     </div>
   );
 }
 
-export function HeatmapDemo() {
+export function HeatmapDemo(): React.JSX.Element {
+  const [scale, setScale] = React.useState<'linear' | 'log'>('linear');
+
   return (
     <div className="space-y-4 @container">
       <p className="text-sm text-muted-foreground">
-        7×24 traffic heatmap with a perceptual OKLCH scale; switch to <code>colorScale=&quot;log&quot;</code> for heavy tails.
+        7×24 traffic heatmap with a perceptual OKLCH scale. Use <code>log</code> to reveal heavy tails.
       </p>
-      <Heatmap data={heatmapData} colorScale="linear" height={360} />
+
+      {/* Controls (tiny, dependency-free) */}
+      <div role="toolbar" aria-label="Heatmap controls" className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-muted-foreground">Scale</span>
+          <button
+            type="button"
+            onClick={() => setScale('linear')}
+            aria-pressed={scale === 'linear'}
+            className={[
+              'inline-flex items-center rounded-md border px-2.5 py-1.5 text-xs font-medium',
+              scale === 'linear' ? 'bg-secondary text-secondary-foreground' : 'bg-card',
+              'border-border hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            ].join(' ')}
+          >
+            Linear
+          </button>
+          <button
+            type="button"
+            onClick={() => setScale('log')}
+            aria-pressed={scale === 'log'}
+            className={[
+              'inline-flex items-center rounded-md border px-2.5 py-1.5 text-xs font-medium',
+              scale === 'log' ? 'bg-secondary text-secondary-foreground' : 'bg-card',
+              'border-border hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            ].join(' ')}
+          >
+            Log
+          </button>
+        </div>
+
+      </div>
+
+      <Heatmap
+        title="Heatmap"
+        description="7×24 traffic with a perceptual OKLCH scale and quantitative legend."
+        data={heatmapData}
+        colorScale={scale}
+        legend
+        xLabel="Hour of day"
+        yLabel="Weekday"
+        axisEmphasis
+        fitMode="fit"
+        squareCells
+      />
     </div>
   );
 }
