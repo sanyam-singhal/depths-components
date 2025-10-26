@@ -23,7 +23,7 @@ const toId = (label: string): string =>
 const sections: string[] = [
   "Building Blocks",
   // Foundations
-  "KPI Stat", "Stat Grid", "Data Table", "Control Bar",
+  "KPI Stat", "Stat Grid", "Data Table", "Control Bar","Radial Gauge",
   // Trends
   "Area Series", "Line Series", "Band Line", "Scatter Plot","Sankey Diagram",
   // Category
@@ -36,7 +36,7 @@ const sections: string[] = [
 
 // --- hello cards (first section targets per cluster) ---
 const clusterCards = [
-  { id: "kpi-stat",       title: "Foundations",  blurb: "KPIs, grids, tables & controls." },
+  { id: "kpi-stat",       title: "Foundations",  blurb: "KPIs, grids, tables, gauge & controls." },
   { id: "area-series",    title: "Trends",       blurb: "Area, line, bands." },
   { id: "bar-list",       title: "Category",     blurb: "Breakdowns: bars & donut." },
   { id: "histogram",      title: "Distribution", blurb: "Histogram & heatmap." },

@@ -26,7 +26,6 @@ import {
   IconChartAreaLine,
   IconChartLine,
   IconWaveSine,
-  IconSparkles,
   IconColumns,
   IconChartBar,
   IconChartDonut,
@@ -40,7 +39,10 @@ import {
   IconLivePhoto,
   IconRipple,
   IconCircle,
-  IconExclamationCircle
+  IconExclamationCircle,
+  IconGaugeFilled,
+  IconChartSankey,
+  IconChartScatter
 } from "@tabler/icons-react";
 
 import { type Icon } from "@tabler/icons-react";
@@ -49,8 +51,8 @@ type SidebarSection = { label: string; items: string[] };
 
 const STRUCTURE: SidebarSection[] = [
   { label: "Building Blocks", items: ["Building blocks"] },
-  { label: "Foundations", items: ["KPI Stat", "Stat Grid", "Data Table", "Control Bar"] },
-  { label: "Trends", items: ["Area Series", "Line Series", "Band Line"] },
+  { label: "Foundations", items: ["KPI Stat", "Stat Grid", "Data Table", "Control Bar", "Radial Gauge"] },
+  { label: "Trends", items: ["Area Series", "Line Series", "Band Line","Scatter Plot","Sankey Diagram"] },
   { label: "Category", items: ["Bar List", "Grouped Bar", "Donut Chart"] },
   { label: "Distribution", items: ["Histogram", "Heatmap"] },
   { label: "LIve", items: ["Live Tail List", "Live Traces Feed"] },
@@ -75,11 +77,13 @@ const ICONS: Record<string, Icon> = {
   "stat-grid": IconLayoutGrid,
   "data-table": IconTable,
   "control-bar": IconAdjustmentsHorizontal,
+  "radial-gauge": IconGaugeFilled,
   // Trends
   "area-series": IconChartAreaLine,
   "line-series": IconChartLine,
   "band-line": IconWaveSine,
-  "sparkline-card": IconSparkles,
+  "scatter-plot": IconChartScatter,
+  "sankey-diagram": IconChartSankey,
   // Category
   "bar-list": IconColumns,
   "grouped-bar": IconChartBar,

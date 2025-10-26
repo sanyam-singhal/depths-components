@@ -6,6 +6,7 @@ import { KPIStat, type TimeSeries } from '@/components/depths/foundations/KPISta
 import { StatGrid } from '@/components/depths/foundations/StatGrid';
 import { DataTable } from '@/components/depths/foundations/DataTable';
 import { ControlBar } from '@/components/depths/foundations/ControlBar';
+import { RadialGauge } from '@/components/depths/foundations/RadialGauge';
 
 // ---- shared dummy data (local to demo, no app bloat) ----
 const sparkline: TimeSeries = {
@@ -166,12 +167,36 @@ export function ControlBarDemo() {
   );
 }
 
-// ---- Public API used by app/page.tsx ----
+// Add this to Demo.tsx after ControlBarDemo
+
+export function RadialGaugeDemo() {
+  return (
+    <div className="space-y-4 @container">
+      <p className="text-sm text-muted-foreground">
+        Radial gauge showing progress/value with dynamic color thresholds and center label.
+      </p>
+      <div className="max-w-sm">
+        <RadialGauge
+          title="Utilization"
+          description="Current system load."
+          value={69}
+          min={0}
+          max={100}
+          unit="%"
+          height={240}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Update FOUNDATION_DEMOS
 export const FOUNDATION_DEMOS = {
   'kpi-stat': KPIStatDemo,
   'stat-grid': StatGridDemo,
   'data-table': DataTableDemo,
   'control-bar': ControlBarDemo,
+  'radial-gauge': RadialGaugeDemo,
 } as const;
 
 export type FoundationId = keyof typeof FOUNDATION_DEMOS;
