@@ -181,7 +181,6 @@ export function SankeyDiagramDemo() {
         title="Sankey Diagram"
         description="Multi-stage flow from sources to sinks."
         data={sankeyData}
-        valueFormatter={(v) => `${v} units`}
         height={320}
         nodeWidth={20}
         nodePadding={50}

@@ -5,9 +5,7 @@ import * as React from 'react';
 import {
   ResponsiveContainer,
   Sankey,
-  Tooltip,
   Layer,
-  type TooltipProps,
 } from 'recharts';
 
 /* -----------------------------------------------------------------------------
@@ -36,9 +34,6 @@ export type SankeyDiagramProps = Readonly<
     /** Sankey data with nodes and links. */
     data: SankeyData;
 
-    /** Value formatter for tooltips and labels. Defaults to localized number. */
-    valueFormatter?: (v: number) => string;
-
     /** Fixed height (px or CSS length). */
     height?: number | string;
 
@@ -47,6 +42,13 @@ export type SankeyDiagramProps = Readonly<
 
     /** Node padding in px. Default: 18. */
     nodePadding?: number;
+
+    /** Margin on the left of the  diagram*/
+    startMargin?: number;
+
+    /** Margin on the right of the  diagram*/
+    endMargin?: number;
+
   }
 >;
 
@@ -67,36 +69,6 @@ function tokenPalette(n: number): string[] {
   return Array.from({ length: n }, (_, i) => vars[i % vars.length]);
 }
 
-/** Minimal, token-aware tooltip for Sankey (shows source → target: value). */
-function TooltipPanel({
-  active,
-  payload,
-  valueFormatter = formatNumber,
-}: {
-  active?: boolean;
-  payload?: TooltipProps<number, string>['payload'];
-  valueFormatter?: (v: number) => string;
-}) {
-  if (!active || !payload || payload.length === 0) return null;
-  const p = payload[0];
-  if (!p.payload) return null;
-  const { source, target, value } = p.payload;
-  return (
-    <div
-      className={[
-        'rounded-md border border-border bg-popover text-popover-foreground',
-        'shadow-sm px-3 py-2 text-xs',
-      ].join(' ')}
-      role="dialog"
-      aria-label="Chart tooltip"
-    >
-      <div className="font-medium">
-        {source.name} → {target.name}
-      </div>
-      <div className="tabular-nums">{valueFormatter(value)}</div>
-    </div>
-  );
-}
 
 type CustomNodeProps = {
   x: number;
@@ -150,10 +122,11 @@ export function SankeyDiagram(props: SankeyDiagramProps): React.JSX.Element {
     title,
     description,
     data,
-    valueFormatter = formatNumber,
     height = 320,
     nodeWidth = 24,
     nodePadding = 18,
+    startMargin = 10,
+    endMargin = 100,
     className,
     isLoading,
     error,
@@ -210,25 +183,17 @@ export function SankeyDiagram(props: SankeyDiagramProps): React.JSX.Element {
       )}
 
       <figure className="w-full">
-        <div className="w-full" style={{ height: chartHeight }}>
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="w-full overflow-x-auto" style={{ height: chartHeight }}>
+          
+          <ResponsiveContainer width="100%" height="100%" minWidth={800}>
             <Sankey
               data={{ nodes: [...data.nodes], links: [...data.links] }}
               nodeWidth={nodeWidth}
               nodePadding={nodePadding}
-              margin={{ top: 8, right: 12, left: 12, bottom: 16 }}
+              margin={{ top: 8, right: endMargin, left: startMargin, bottom: 16 }}
               link={{ stroke: 'var(--color-border)', strokeOpacity: 0.4 }}
               node={(nodeProps) => CustomNode({ ...nodeProps, colors })}
             >
-              <Tooltip
-                content={(p: TooltipProps<number, string>) => (
-                  <TooltipPanel
-                    active={p.active}
-                    payload={p.payload}
-                    valueFormatter={valueFormatter}
-                  />
-                )}
-              />
             </Sankey>
           </ResponsiveContainer>
         </div>
