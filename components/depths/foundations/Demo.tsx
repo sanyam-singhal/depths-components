@@ -2,14 +2,14 @@
 'use client';
 
 import * as React from 'react';
-import { KPIStat, type TimeSeries } from '@/components/depths/foundations/KPIStat';
+import { KPIStat } from '@/components/depths/foundations/KPIStat';
 import { StatGrid } from '@/components/depths/foundations/StatGrid';
 import { DataTable } from '@/components/depths/foundations/DataTable';
 import { ControlBar } from '@/components/depths/foundations/ControlBar';
 import { RadialGauge } from '@/components/depths/foundations/RadialGauge';
 
 // ---- shared dummy data (local to demo, no app bloat) ----
-const sparkline: TimeSeries = {
+const sparkline= {
   key: 'active-sessions',
   points: Array.from({ length: 16 }, (_, i) => ({
     t: i,

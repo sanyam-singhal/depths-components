@@ -2,13 +2,12 @@
 'use client';
 
 import * as React from 'react';
-import type { CategoryItem, DonutSlice } from '@/components/depths/lib/types'; // Assuming types are in a shared lib, but denormalized per file in practice
 import { BarList } from '@/components/depths/category/BarList';
 import { GroupedBar } from '@/components/depths/category/GroupedBar';
 import { DonutChart } from '@/components/depths/category/DonutChart';
 
 // ---------- deterministic dummy data ----------
-const topCategories: CategoryItem[] = [
+const topCategories = [
   { label: 'Search',  value: 128_430, delta:  3.6 },
   { label: 'Checkout',value:  96_210, delta: -1.8 },
   { label: 'Auth',    value:  88_775, delta:  0.9 },
@@ -26,7 +25,7 @@ const groupedSeries = [
   { key: 'Android', values: [2200, 1400, 4100, 1100, 1300] },
 ];
 
-const donutSlices: DonutSlice[] = [
+const donutSlices = [
   { label: 'US',    value: 450 },
   { label: 'EU',    value: 280 },
   { label: 'APAC',  value: 170 },

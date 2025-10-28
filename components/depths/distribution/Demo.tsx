@@ -2,7 +2,6 @@
 'use client';
 
 import * as React from 'react';
-import type { HistogramData, HeatmapData } from '@/components/depths/lib/types';
 import { Histogram } from '@/components/depths/distribution/Histogram';
 import { Heatmap } from '@/components/depths/distribution/Heatmap';
 import { WorldMap } from '@/components/depths/distribution/WorldMap';
@@ -18,7 +17,7 @@ const HIST_COUNTS = (() => {
   const scale = 1200 / raw.reduce((a, b) => a + b, 0); // ~1200 total
   return raw.map(x => Math.max(1, Math.round(x * scale)));
 })();
-const histData: HistogramData = { bins: HIST_BINS, counts: HIST_COUNTS };
+const histData = { bins: HIST_BINS, counts: HIST_COUNTS };
 
 // Heatmap: 7 days × 24 hours with diurnal + weekday effects
 const xLabels = Array.from({ length: 24 }, (_, h) => h.toString().padStart(2, '0'));
@@ -31,7 +30,7 @@ const z: number[][] = yLabels.map((d, di) =>
     return Math.max(0, Math.round((base * (1 + dayShift)) + jitter));
   })
 );
-const heatmapData: HeatmapData = { xLabels, yLabels, z };
+const heatmapData = { xLabels, yLabels, z };
 
 // WorldMap: dummy data for a few countries (ISO2 -> value)
 const worldData: Record<string, number> = {

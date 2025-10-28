@@ -3,35 +3,35 @@
 
 import * as React from 'react';
 import { AreaSeries } from '@/components/depths/trends/AreaSeries';
-import { LineSeries, type TimeSeries } from '@/components/depths/trends/LineSeries';
-import { BandLine, type BandSeries } from '@/components/depths/trends/BandLine';
-import { ScatterPlot, type ScatterSeries } from '@/components/depths/trends/ScatterPlot';
-import { SankeyDiagram, type SankeyData } from '@/components/depths/trends/SankeyDiagram';
+import { LineSeries } from '@/components/depths/trends/LineSeries';
+import { BandLine } from '@/components/depths/trends/BandLine';
+import { ScatterPlot } from '@/components/depths/trends/ScatterPlot';
+import { SankeyDiagram } from '@/components/depths/trends/SankeyDiagram';
 
 // ---------- deterministic dummy data helpers ----------
-const ts = (key: string, n = 48, f: (i: number) => number): TimeSeries => ({
+const ts = (key: string, n = 48, f: (i: number) => number) => ({
   key,
   points: Array.from({ length: n }, (_, i) => ({ t: i, v: Math.max(0, Math.round(f(i))) })),
 });
 
-const percent = (key: string, n = 48, f: (i: number) => number): TimeSeries => ({
+const percent = (key: string, n = 48, f: (i: number) => number) => ({
   key,
   points: Array.from({ length: n }, (_, i) => ({ t: i, v: Number(f(i).toFixed(1)) })), // keep decimals
 });
 
 // ---------- shared series ----------
-const areaSeries: TimeSeries[] = [
+const areaSeries = [
   ts('orders', 64, i => 120 + 40 * Math.sin(i / 4) + i * 0.6),
   ts('revenue', 64, i => 300 + 70 * Math.cos(i / 5) + i * 1.2),
   ts('refunds', 64, i => 15 + 8 * Math.sin(i / 3 + 2)),
 ];
 
-const linePctSeries: TimeSeries[] = [
+const linePctSeries= [
   percent('uptime', 72, i => 98 + 1.2 * Math.sin(i / 6)),
   percent('errorRate', 72, i => 1 + 0.7 * Math.abs(Math.sin(i / 5 + 1))), // 0–2%
 ];
 
-const latencyBand: BandSeries = {
+const latencyBand = {
   key: 'latency',
   points: Array.from({ length: 72 }, (_, i) => {
     const base = 120 + 40 * Math.sin(i / 6) + (i % 17);
@@ -117,7 +117,7 @@ export function BandLineDemo() {
 
 // Add this to Demo.tsx after BandLineDemo
 
-const scatterSeries: ScatterSeries[] = [
+const scatterSeries = [
   { key: 'groupA', points: Array.from({ length: 32 }, (_, i) => ({ x: i, y: 20 + 15 * Math.sin(i / 3) + Math.random() * 10 })) },
   { key: 'groupB', points: Array.from({ length: 32 }, (_, i) => ({ x: i, y: 40 + 20 * Math.cos(i / 4) + Math.random() * 8 })) },
 ];
@@ -148,7 +148,7 @@ export function ScatterPlotDemo() {
 
 // Add this to Demo.tsx after ScatterPlotDemo
 
-const sankeyData: SankeyData = {
+const sankeyData = {
   nodes: [
     { name: 'Source A' },
     { name: 'Source B' },
