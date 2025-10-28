@@ -104,7 +104,7 @@ export function WorldMapDemo(): React.JSX.Element {
         title="World Map"
         description="Values by country (dummy data)."
         data={worldData}
-        height={400}
+        height={500}
       />
     </div>
   );
