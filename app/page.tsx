@@ -29,7 +29,7 @@ const sections: string[] = [
   // Category
   "Bar List", "Grouped Bar", "Donut Chart",
   // Distribution
-  "Histogram", "Heatmap",
+  "Histogram", "Heatmap", "World Map",
   // Live
   "Live Tail List", "Live Traces Feed",
 ];

@@ -5,6 +5,7 @@ import * as React from 'react';
 import type { HistogramData, HeatmapData } from '@/components/depths/lib/types';
 import { Histogram } from '@/components/depths/distribution/Histogram';
 import { Heatmap } from '@/components/depths/distribution/Heatmap';
+import { WorldMap } from '@/components/depths/distribution/WorldMap';
 
 // ---------------- deterministic dummy data ----------------
 
@@ -31,6 +32,21 @@ const z: number[][] = yLabels.map((d, di) =>
   })
 );
 const heatmapData: HeatmapData = { xLabels, yLabels, z };
+
+// WorldMap: dummy data for a few countries (ISO2 -> value)
+const worldData: Record<string, number> = {
+  'US': 1000,
+  'CN': 800,
+  'IN': 600,
+  'BR': 400,
+  'RU': 300,
+  'GB': 200,
+  'FR': 150,
+  'DE': 120,
+  'JP': 100,
+  'AU': 80,
+  // Add more as needed for demo
+};
 
 // ---------------- Demos ----------------
 
@@ -77,16 +93,34 @@ export function HeatmapDemo(): React.JSX.Element {
   );
 }
 
+export function WorldMapDemo(): React.JSX.Element {
+  return (
+    <div className="space-y-4 @container">
+      <p className="text-sm text-muted-foreground">
+        World map choropleth with perceptual color ramp, hover tooltips, and flag icons.
+      </p>
+
+      <WorldMap
+        title="World Map"
+        description="Values by country (dummy data)."
+        data={worldData}
+        height={400}
+      />
+    </div>
+  );
+}
+
 // ---------------- Public registry + resolver ----------------
 
 export const DISTRIBUTION_DEMOS = {
   histogram: HistogramDemo,
   heatmap: HeatmapDemo,
+  worldmap: WorldMapDemo,
 } as const;
 
 export type DistributionId = keyof typeof DISTRIBUTION_DEMOS;
-
 export function renderDistributionDemo(id: string): React.ReactNode {
-  const C = (DISTRIBUTION_DEMOS as Record<string, React.ComponentType | undefined>)[id];
+  const alias = id === 'world-map' ? 'worldmap' : id; // <-- add this line
+  const C = (DISTRIBUTION_DEMOS as Record<string, React.ComponentType | undefined>)[alias];
   return C ? <C /> : null;
 }
