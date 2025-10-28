@@ -42,7 +42,8 @@ import {
   IconExclamationCircle,
   IconGaugeFilled,
   IconChartSankey,
-  IconChartScatter
+  IconChartScatter,
+  IconWorld
 } from "@tabler/icons-react";
 
 import { type Icon } from "@tabler/icons-react";
@@ -54,7 +55,7 @@ const STRUCTURE: SidebarSection[] = [
   { label: "Foundations", items: ["KPI Stat", "Stat Grid", "Data Table", "Control Bar", "Radial Gauge"] },
   { label: "Trends", items: ["Area Series", "Line Series", "Band Line","Scatter Plot","Sankey Diagram"] },
   { label: "Category", items: ["Bar List", "Grouped Bar", "Donut Chart"] },
-  { label: "Distribution", items: ["Histogram", "Heatmap"] },
+  { label: "Distribution", items: ["Histogram", "Heatmap","World Map"] },
   { label: "LIve", items: ["Live Tail List", "Live Traces Feed"] },
 ];
 
@@ -91,6 +92,7 @@ const ICONS: Record<string, Icon> = {
   // distribution
   "histogram": IconChartHistogram,
   "heatmap": IconGridDots,
+  "world-map": IconWorld,
   // Specialized
   "funnel": IconChartFunnel,
   "timeline": IconTimeline,
