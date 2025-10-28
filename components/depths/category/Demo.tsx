@@ -27,11 +27,11 @@ const groupedSeries = [
 ];
 
 const donutSlices: DonutSlice[] = [
-  { label: 'US',    value: 45 },
-  { label: 'EU',    value: 28 },
-  { label: 'APAC',  value: 17 },
-  { label: 'LATAM', value: 6  },
-  { label: 'MEA',   value: 4  },
+  { label: 'US',    value: 450 },
+  { label: 'EU',    value: 280 },
+  { label: 'APAC',  value: 170 },
+  { label: 'LATAM', value: 60  },
+  { label: 'MEA',   value: 40  },
 ];
 
 // ---------- Demos ----------

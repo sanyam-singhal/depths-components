@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 
+/* … types & helpers unchanged … */
+
 export type BaseChartProps = Readonly<{
   className?: string;
   isLoading?: boolean;
@@ -36,14 +38,12 @@ export type HeatmapProps = Readonly<
   }
 >;
 
-/* ───────────────────────────────── helpers ───────────────────────────────── */
+/* ───────────────────────────────── helpers (unchanged) ───────────────────────────────── */
 
 const fmtDefault = (v: number) =>
   new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(v);
 
-function clamp01(n: number) {
-  return Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0;
-}
+function clamp01(n: number) { return Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0; }
 
 function computeDomain(
   z: ReadonlyArray<ReadonlyArray<number>>,
@@ -59,9 +59,7 @@ function computeDomain(
       }
     }
   }
-  if (!Number.isFinite(min) || !Number.isFinite(max)) {
-    min = 0; max = 1;
-  }
+  if (!Number.isFinite(min) || !Number.isFinite(max)) { min = 0; max = 1; }
   if (dom?.min != null) min = Number(dom.min);
   if (dom?.max != null) max = Number(dom.max);
   if (max <= min) max = min + 1;
@@ -133,31 +131,18 @@ function buildLegendTicks(values: number[], meta: ScaleMeta) {
 
 type CellPos = { r: number; c: number; v: number };
 
-export function Heatmap({
-  title,
-  description,
-  data,
-  domain,
-  xLabel,
-  yLabel,
-  valueFormatter = fmtDefault,
-  legend = true,
-  fitMode = 'fit',
-  axisEmphasis = true,
-  gap = 2,
-  squareCells = true,
-  height,
-  className,
-  isLoading,
-  error,
-  onCellClick,
-  onCellFocus,
-  ...a11y
-}: HeatmapProps): React.JSX.Element {
+export function Heatmap(props: HeatmapProps): React.JSX.Element {
+  const {
+    title, description, data, domain, xLabel, yLabel,
+    valueFormatter = fmtDefault, legend = true, fitMode = 'fit',
+    axisEmphasis = true, gap = 2, squareCells = true, height,
+    className, isLoading, error, onCellClick, onCellFocus, ...a11y
+  } = props;
+
   const rows = data.yLabels.length;
   const cols = data.xLabels.length;
 
-  // Internal state for controls (previously passed as prop)
+  // Internal state for controls
   const [colorScale, setColorScale] = React.useState<'linear' | 'log'>('linear');
 
   // flatten values for domain/legend
@@ -184,7 +169,7 @@ export function Heatmap({
   const [cellPx, setCellPx] = React.useState<number>(16);
   const [stickyHeight, setStickyHeight] = React.useState<number>(0);
 
-  // Responsive sizing: compute cell size to fit/fill width
+  // Responsive sizing via ResizeObserver (observing frame + sticky)
   React.useEffect(() => {
     const frame = frameRef.current;
     const sticky = stickyRef.current;
@@ -196,14 +181,14 @@ export function Heatmap({
 
       if (cols === 0) return;
 
-      const inner = Math.max(0, w - 32); // full px-2 left/right
+      const inner = Math.max(0, w - 32); // p-2 left/right
       const desired = (inner - (cols - 1) * gap) / cols;
 
       let px: number;
       if (fitMode === 'fit') {
-        px = Math.floor(Math.max(12, desired)); // no max clamp to fill width
+        px = Math.floor(Math.max(12, desired));
       } else {
-        px = Math.floor(Math.max(10, Math.min(20, desired))); // clamped for scroll
+        px = Math.floor(Math.max(10, Math.min(20, desired)));
       }
       setCellPx(px);
     });
@@ -224,36 +209,15 @@ export function Heatmap({
 
   function onCellKeyDown(e: React.KeyboardEvent<HTMLButtonElement>, r: number, c: number, v: number) {
     const key = e.key;
-    if (
-      key === 'ArrowRight' || key === 'ArrowLeft' ||
-      key === 'ArrowDown' || key === 'ArrowUp' ||
-      key === 'Home' || key === 'End'
-    ) {
+    if (key === 'ArrowRight' || key === 'ArrowLeft' || key === 'ArrowDown' || key === 'ArrowUp' || key === 'Home' || key === 'End') {
       e.preventDefault();
     }
-    if (key === 'ArrowRight') {
-      const nc = Math.min(cols - 1, c + 1);
-      focusCell(r, nc); setTab({ r, c: nc, v: data.z[r]?.[nc] ?? 0 });
-    }
-    if (key === 'ArrowLeft') {
-      const nc = Math.max(0, c - 1);
-      focusCell(r, nc); setTab({ r, c: nc, v: data.z[r]?.[nc] ?? 0 });
-    }
-    if (key === 'ArrowDown') {
-      const nr = Math.min(rows - 1, r + 1);
-      focusCell(nr, c); setTab({ r: nr, c, v: data.z[nr]?.[c] ?? 0 });
-    }
-    if (key === 'ArrowUp') {
-      const nr = Math.max(0, r - 1);
-      focusCell(nr, c); setTab({ r: nr, c, v: data.z[nr]?.[c] ?? 0 });
-    }
-    if (key === 'Home') {
-      focusCell(r, 0); setTab({ r, c: 0, v: data.z[r]?.[0] ?? 0 });
-    }
-    if (key === 'End') {
-      const nc = cols - 1;
-      focusCell(r, nc); setTab({ r, c: nc, v: data.z[r]?.[nc] ?? 0 });
-    }
+    if (key === 'ArrowRight') { const nc = Math.min(cols - 1, c + 1); focusCell(r, nc); setTab({ r, c: nc, v: data.z[r]?.[nc] ?? 0 }); }
+    if (key === 'ArrowLeft')  { const nc = Math.max(0, c - 1);       focusCell(r, nc); setTab({ r, c: nc, v: data.z[r]?.[nc] ?? 0 }); }
+    if (key === 'ArrowDown') { const nr = Math.min(rows - 1, r + 1); focusCell(nr, c); setTab({ r: nr, c, v: data.z[nr]?.[c] ?? 0 }); }
+    if (key === 'ArrowUp')   { const nr = Math.max(0, r - 1);        focusCell(nr, c); setTab({ r: nr, c, v: data.z[nr]?.[c] ?? 0 }); }
+    if (key === 'Home')      { focusCell(r, 0); setTab({ r, c: 0, v: data.z[r]?.[0] ?? 0 }); }
+    if (key === 'End')       { const nc = cols - 1; focusCell(r, nc); setTab({ r, c: nc, v: data.z[r]?.[nc] ?? 0 }); }
     if (key === 'Enter' || key === ' ') onCellClick?.(r, c, v);
     if (key === 'Escape') setActive(null);
   }
@@ -268,13 +232,9 @@ export function Heatmap({
     setAnchor({ x: cr.left - wr.left + cr.width / 2, y: cr.top - wr.top + cr.height / 2 });
   }
 
-  /* skeleton / error (unchanged) */
   if (error) {
     return (
-      <div
-        {...a11y}
-        className={['rounded-lg border border-destructive/25 bg-destructive/10 p-3 text-sm text-destructive', className ?? ''].join(' ')}
-      >
+      <div {...a11y} className={['rounded-lg border border-destructive/25 bg-destructive/10 p-3 text-sm text-destructive', className ?? ''].join(' ')}>
         {error.message ?? 'Something went wrong.'}
       </div>
     );
@@ -292,16 +252,16 @@ export function Heatmap({
   }
 
   /* layout numbers shared by grid + ticks so they never drift */
-  const gridCols = `repeat(${cols}, ${cellPx}px)`;
-  const gridGap = `${gap}px`;
+  const gridCols = `repeat(${cols}, ${cellPx}px)`;   // grid-template-columns
+  const gridGap = `${gap}px`;                        // gap
+  const gridHeight = rows * cellPx + (rows - 1) * gap;
 
   /* content height so Y scroll is allowed (if needed) */
-  const contentH = rows * cellPx + (rows - 1) * gap + 16 + stickyHeight; // + p-2 + sticky
+  const contentH = gridHeight + 16 + stickyHeight; // + p-2 + sticky
   const frameHeight = height
     ? (typeof height === 'number' ? `${height}px` : height)
     : (squareCells ? `${contentH}px` : 'auto');
 
-  /* UI */
   return (
     <section
       {...a11y}
@@ -319,8 +279,8 @@ export function Heatmap({
         </header>
       )}
 
-      {/* Integrated controls (ShadCN-styled buttons) */}
-      <div role="toolbar" aria-label="Heatmap controls" className="flex flex-wrap items-center gap-2 mb-4">
+      {/* Controls */}
+      <div role="toolbar" aria-label="Heatmap controls" className="mb-4 flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1">
           <span className="text-xs text-muted-foreground">Scale</span>
           <button
@@ -351,14 +311,28 @@ export function Heatmap({
       </div>
 
       <div className="flex items-stretch">
-        {/* Y-axis gutter */}
-        <div className="mr-2 flex shrink-0 select-none flex-col relative" style={{ width: 'max-content' }}>
+        {/* Y-axis gutter  — now fully inside the component with a baseline */}
+        <div
+          className="mr-2 flex shrink-0 select-none items-stretch border-r border-border pr-2"
+          style={{ width: 'max-content' }}
+        >
+          {/* Vertical axis title inside layout: no absolute/overflow */}
           {yLabel && (
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full pr-2 text-[12px] font-medium text-foreground/80 rotate-[-90deg]">
+            <div
+              className={[
+                'flex items-center justify-center',
+                'w-[14px] pr-2 text-base font-semibold text-muted-foreground',
+                '[writing-mode:vertical-rl] rotate-180',
+              ].join(' ')}
+              style={{ height: `${gridHeight + 16}px` /* grid + p-2 */ }}
+              aria-hidden
+            >
               {yLabel}
             </div>
           )}
-          <div className="flex flex-col pt-2" aria-hidden>
+
+          {/* Tick labels */}
+          <div className="flex flex-col pt-2 pl-4" aria-hidden>
             {data.yLabels.map((y, i) => {
               const emph = axisEmphasis && hoverRow != null;
               const cls = emph ? (hoverRow === i ? 'text-foreground' : 'text-foreground/60') : 'text-foreground/80';
@@ -372,8 +346,9 @@ export function Heatmap({
                 </div>
               );
             })}
+            {/* room for sticky x-axis */}
+            <div className="h-6" />
           </div>
-          <div className="h-6" />
         </div>
 
         {/* Scroll frame */}
@@ -442,7 +417,7 @@ export function Heatmap({
               )}
             </div>
 
-            {/* Sticky bottom x-ticks */}
+            {/* Sticky bottom x-axis: baseline + ticks, aligned to grid */}
             <div
               ref={stickyRef}
               className="sticky bottom-0 z-10 border-t border-border bg-card/95 px-2 pb-2 pt-1 backdrop-blur"
@@ -462,10 +437,10 @@ export function Heatmap({
                   );
                 })}
               </div>
-              {xLabel && <div className="mt-1 text-center text-[12px] text-foreground/80">{xLabel}</div>}
+              {xLabel && <div className="mt-1 text-center text-base font-semibold text-muted-foreground">{xLabel}</div>}
             </div>
 
-            {/* Polished tooltip */}
+            {/* Tooltip */}
             {active && anchor && (
               <div
                 role="tooltip"
@@ -482,7 +457,7 @@ export function Heatmap({
         </div>
       </div>
 
-      {/* Legend (bottom only) */}
+      {/* Legend */}
       {legend && (
         <div className="mt-3 flex items-center gap-3">
           <div className="text-xs text-muted-foreground">{xLabel ? xLabel : 'Scale'}</div>
