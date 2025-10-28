@@ -11,6 +11,7 @@ import {
   Tooltip,
   CartesianGrid,
   Label,
+  Brush,
   type TooltipProps,
 } from 'recharts';
 
@@ -44,6 +45,9 @@ export type ScatterPlotProps = Readonly<
     /** Where to place the legend; default: 'header'. */
     legend?: LegendPlacement;
 
+    /** Show the brush (range selector) footer. Default: true. */
+    brush?: boolean;
+
     /** Axis labels & optional formatters. */
     xLabel?: string;
     yLabel?: string;
@@ -66,9 +70,17 @@ function formatNumber(v: number): string {
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(v);
 }
 
-/** Flatten series for Recharts; each series keeps its points array. */
-function toRechartsSeries(series: ReadonlyArray<ScatterSeries>): ScatterSeries[] {
-  return series.map((s) => ({ key: s.key, points: [...s.points] }));
+/** Merge x-aligned series into a flat array for Recharts (handles unaligned points). */
+function toRechartsRows(series: ReadonlyArray<ScatterSeries>): Array<Record<string, number>> {
+  const byX = new Map<number, Record<string, number>>();
+  for (const s of series) {
+    for (const p of s.points) {
+      const row = byX.get(p.x) ?? { x: p.x };
+      row[s.key] = p.y;
+      byX.set(p.x, row);
+    }
+  }
+  return [...byX.values()].sort((a, b) => a.x - b.x);
 }
 
 /** Palette from CSS variables (Tailwind v4 theme vars). */
@@ -87,12 +99,10 @@ function tokenPalette(n: number): string[] {
 function TooltipPanel({
   active,
   payload,
-  label,
   valueFormatter = formatNumber,
 }: {
   active?: boolean;
   payload?: TooltipProps<number, string>['payload'];
-  label?: number | string;
   valueFormatter?: (v: number) => string;
 }) {
   if (!active || !payload || payload.length === 0) return null;
@@ -105,14 +115,13 @@ function TooltipPanel({
       role="dialog"
       aria-label="Chart tooltip"
     >
-      <div className="mb-1 font-medium tabular-nums">{String(label)}</div>
       <div className="space-y-1">
         {payload
           .filter((p) => typeof p.value === 'number' && p.dataKey)
           .map((p) => {
             const color = p.color ?? 'var(--color-foreground)';
             const x = Number(p.payload?.x ?? 0);
-            const y = Number(p.payload?.y ?? 0);
+            const y = Number(p.value ?? 0);
             return (
               <div key={String(p.dataKey)} className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
@@ -144,6 +153,7 @@ export function ScatterPlot(props: ScatterPlotProps): React.JSX.Element {
     description,
     series,
     legend = 'header',
+    brush = true,
     xLabel,
     yLabel,
     xTickFormatter,
@@ -157,7 +167,7 @@ export function ScatterPlot(props: ScatterPlotProps): React.JSX.Element {
     ...a11y
   } = props;
 
-  const scatters = React.useMemo(() => toRechartsSeries(series), [series]);
+  const rows = React.useMemo(() => toRechartsRows(series), [series]);
   const keys = React.useMemo(() => series.map((s) => s.key), [series]);
   const colors = React.useMemo(() => tokenPalette(keys.length), [keys.length]);
 
@@ -174,7 +184,6 @@ export function ScatterPlot(props: ScatterPlotProps): React.JSX.Element {
     });
   }, []);
 
-  // basic error/loading visuals
   if (error) {
     return (
       <div
@@ -206,11 +215,9 @@ export function ScatterPlot(props: ScatterPlotProps): React.JSX.Element {
   return (
     <section
       {...a11y}
-      className={[
-        '@container',
-        'rounded-lg border border-border bg-card shadow-sm p-3 @md:p-4',
-        className ?? '',
-      ].join(' ')}
+      className={['@container', 'rounded-lg border border-border bg-card shadow-sm p-3 @md:p-4', className ?? ''].join(
+        ' ',
+      )}
     >
       {(title || description || (legend === 'header' && keys.length > 1)) && (
         <header className="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -257,7 +264,8 @@ export function ScatterPlot(props: ScatterPlotProps): React.JSX.Element {
         <div className="w-full" style={{ height: chartHeight }}>
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart
-              margin={{ top: 8, right: 12, left: 12, bottom: 16 }}
+              data={rows}
+              margin={{ top: 8, right: 12, left: 12, bottom: brush ? 32 : 16 }}
             >
               <CartesianGrid stroke="var(--color-border)" vertical={false} />
 
@@ -277,7 +285,7 @@ export function ScatterPlot(props: ScatterPlotProps): React.JSX.Element {
                   <Label
                     value={xLabel}
                     position="insideBottom"
-                    offset={-16}
+                    offset={-32}
                     className="fill-[var(--color-muted-foreground)] text-base font-semibold"
                   />
                 ) : null}
@@ -285,7 +293,6 @@ export function ScatterPlot(props: ScatterPlotProps): React.JSX.Element {
 
               <YAxis
                 type="number"
-                dataKey="y"
                 name="y"
                 tickFormatter={yTickFormatter}
                 tick={{ fill: 'var(--color-foreground)', opacity: 0.9, fontSize: 12 }}
@@ -312,29 +319,37 @@ export function ScatterPlot(props: ScatterPlotProps): React.JSX.Element {
                   <TooltipPanel
                     active={p.active}
                     payload={p.payload}
-                    label={p.label}
                     valueFormatter={valueFormatter}
                   />
                 )}
               />
 
-              {scatters.map((s, i) => {
-                if (hidden.has(s.key)) return null;
-                const dim = focusKey && focusKey !== s.key;
+              {keys.map((k, i) => {
+                if (hidden.has(k)) return null;
+                const dim = focusKey && focusKey !== k;
                 const color = colors[i];
                 return (
                   <Scatter
-                    key={s.key}
-                    name={s.key}
-                    data={[...s.points]}
+                    key={k}
+                    name={k}
+                    dataKey={k}
                     fill={color}
                     className={dim ? 'opacity-60' : ''}
-                    aria-label={`Series ${s.key}`}
+                    aria-label={`Series ${k}`}
                     shape="circle"
-                    radius={dotSize}
+                    r={dotSize}
                   />
                 );
               })}
+
+              {brush && (
+                <Brush
+                  dataKey="x"
+                  height={12}
+                  travellerWidth={10}
+                  stroke="var(--color-chart-1)"
+                />
+              )}
             </ScatterChart>
           </ResponsiveContainer>
         </div>

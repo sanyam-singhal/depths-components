@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
   type TooltipProps,
+  type LegendProps,
 } from 'recharts';
 
 export type BaseChartProps = Readonly<{
@@ -63,20 +64,25 @@ function tokenPalette(n: number): string[] {
   return Array.from({ length: n }, (_, i) => vars[i % vars.length]);
 }
 
-/** Lightweight custom tooltip (token-driven). */
+/** Custom tooltip – shows % (and absolute in parentheses when asPercent) */
 function TooltipPanel({
   active,
   payload,
   valueFormatter = formatNumber,
+  percentMode = false,
 }: {
   active?: boolean;
   payload?: TooltipProps<number, string>['payload'];
   valueFormatter?: (v: number) => string;
+  percentMode?: boolean;
 }) {
   if (!active || !payload || payload.length === 0) return null;
 
   const entry = payload[0];
   if (!entry) return null;
+
+  const formatted = valueFormatter(Number(entry.value));
+  const absolute = percentMode ? ` (${formatNumber(Number(entry.value))})` : '';
 
   return (
     <div
@@ -95,7 +101,42 @@ function TooltipPanel({
         />
         <span className="font-medium">{entry.name}</span>
       </div>
-      <div className="mt-1 tabular-nums">{valueFormatter(Number(entry.value))}</div>
+      <div className="mt-1 tabular-nums">
+        {formatted}
+        {absolute}
+      </div>
+    </div>
+  );
+}
+
+/** Custom legend – matches ShadCN typography & token palette */
+function CustomLegend(props: LegendProps) {
+  const { payload, layout } = props;
+
+  if (!payload || payload.length === 0) return null;
+
+  const isVertical = layout === 'vertical';
+
+  return (
+    <div
+      className={[
+        'flex flex-wrap gap-3',
+        isVertical ? 'flex-col items-start' : 'justify-center',
+      ].join(' ')}
+    >
+      {payload.map((entry, idx) => (
+        <div
+          key={entry.value ?? idx}
+          className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground"
+        >
+          <span
+            aria-hidden
+            className="inline-block h-2.5 w-2.5 rounded-sm"
+            style={{ background: entry.color }}
+          />
+          <span>{entry.value}</span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -125,7 +166,8 @@ export function DonutChart(props: DonutChartProps): React.JSX.Element {
   const total = React.useMemo(() => slices.reduce((s, x) => s + x.value, 0), [slices]);
 
   const data = React.useMemo(() => {
-    if (!asPercent || combineUnderPct <= 0 || total <= 0) return slices.map((s) => ({ ...s, total }));
+    if (!asPercent || combineUnderPct <= 0 || total <= 0)
+      return slices.map((s) => ({ ...s, total }));
     const pct = (v: number) => (v / total) * 100;
     const majors = slices.filter((s) => pct(s.value) >= combineUnderPct);
     const minors = slices.filter((s) => pct(s.value) < combineUnderPct);
@@ -136,14 +178,20 @@ export function DonutChart(props: DonutChartProps): React.JSX.Element {
 
   const colors = React.useMemo(() => tokenPalette(data.length), [data.length]);
 
-  const vFmt = asPercent ? (v: number) => formatPercent(v / Math.max(total, 1)) : valueFormatter;
-  const centerText = centerLabel ?? (asPercent ? '100%' : valueFormatter(total));
+  const vFmt = asPercent
+    ? (v: number) => formatPercent(v / Math.max(total, 1))
+    : valueFormatter;
 
-  // Client-only render for Recharts to avoid SSR hydration mismatches
+  // Center value (big) – always the total (or 100% when asPercent)
+  const centerValueText = asPercent ? '100%' : valueFormatter(total);
+
+  // Client-only render for Recharts
   const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => { setMounted(true); }, []);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  // simple empty/error/loading states
+  // Loading / error states
   if (error) {
     return (
       <div
@@ -180,11 +228,13 @@ export function DonutChart(props: DonutChartProps): React.JSX.Element {
         className ?? '',
       ].join(' ')}
     >
-      {/* Header: title, description */}
+      {/* Header */}
       {(title || description) && (
         <header className="mb-3">
           {title && <h3 className="text-lg font-semibold text-foreground">{title}</h3>}
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          {description && (
+            <p className="text-sm text-muted-foreground">{description}</p>
+          )}
         </header>
       )}
 
@@ -210,28 +260,35 @@ export function DonutChart(props: DonutChartProps): React.JSX.Element {
                   />
                 ))}
               </Pie>
+
               <Tooltip
                 content={(p: TooltipProps<number, string>) => (
                   <TooltipPanel
                     active={p.active}
                     payload={p.payload}
                     valueFormatter={vFmt}
+                    percentMode={asPercent}
                   />
                 )}
               />
+
+              {/* Custom legend – fixes font mismatch */}
               {legend !== 'none' && (
                 <Legend
                   layout={legend === 'right' ? 'vertical' : 'horizontal'}
                   align={legend === 'right' ? 'right' : 'center'}
                   verticalAlign={legend === 'right' ? 'middle' : 'bottom'}
+                  content={<CustomLegend />}
                 />
               )}
             </PieChart>
           </ResponsiveContainer>
         )}
+
+        {/* Center text – total (big) + optional label (small) */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <div className="text-lg font-semibold tabular-nums">{centerText}</div>
-          {centerLabel && <div className="text-xs text-muted-foreground">{centerLabel}</div>}
+          { centerLabel && (<div className="text-lg font-semibold tabular-nums">{centerLabel}</div>)}
+            <div className="text-xs text-muted-foreground">{centerValueText}</div>
         </div>
       </figure>
     </section>
